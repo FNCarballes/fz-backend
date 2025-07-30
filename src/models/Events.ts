@@ -3,6 +3,7 @@ import mongoose, { Document, Types } from "mongoose";
 
 // 1️⃣ Define una interfaz TypeScript
 export interface IEvent extends Document {
+  _id: Types.ObjectId; // ✅ Mongoose crea un _id automáticamente
   titleEvent: string;
   publicDescription: string;
   privateDescription: string;

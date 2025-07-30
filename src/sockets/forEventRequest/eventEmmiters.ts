@@ -24,3 +24,12 @@ export const emitToUser = (
   io.to(userId).emit(type, payload);
   console.log(`🔔 ${type} emitido a ${userId}`);
 };
+
+export const emitToAll = (
+  io: Server,
+  type: string,
+  payload: any
+) => {
+  io.emit(type, payload);
+  console.log(`🌍 ${type} emitido a TODOS`);
+};
