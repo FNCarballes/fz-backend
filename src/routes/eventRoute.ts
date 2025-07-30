@@ -42,14 +42,15 @@ export function cleanEventDoc(doc: IEvent) {
 
     // Como la virtual `participants` ya trae la subdocumento completo,
     // aquí sólo extraemos userId:
-    participants: ev.participants.map((p: any) => p.userId),
+    participants: ev.participants?.map((p: any) => p.userId) || [],
 
     // Y requests virtuales pasadas a tu forma:
-    requests: ev.requests.map((r: any) => ({
-      requestId: r._id,
-      status: r.status,
-      user: r.userId,
-    })),
+    requests:
+      ev.requests.map((r: any) => ({
+        requestId: r._id,
+        status: r.status,
+        user: r.userId,
+      })) || [],
   };
 }
 
@@ -122,19 +123,29 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 // PATCH /api/events/:id
 router.patch(
   "/:id",
+  authMiddleware,
+  validate(createEventSchema),
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const updateFields = { ...req.body };
-      const updated = await EventModel.findByIdAndUpdate(id, updateFields, {
-        new: true,
-      });
-      if (!updated) {
+      const userId = (req as any).userId;
+
+      const event = await EventModel.findById(id);
+      if (!event) {
         res.status(404).json({ error: "Evento no encontrado" });
         return;
       }
 
-      const io: SocketIOServer = req.app.io;
+      if (event.creator.toString() !== userId) {
+        res.status(403).json({ error: "No autorizado" });
+        return;
+      }
+
+      // Autorizado => actualizar campos
+      Object.assign(event, req.body);
+      const updated = await event.save();
+
+      const io = req.app.get("io") as SocketIOServer;
       io.emit("event:updated", cleanEventDoc(updated));
 
       res.json(cleanEventDoc(updated));
@@ -143,6 +154,8 @@ router.patch(
     }
   }
 );
+
+
 
 router.post(
   "/",
@@ -174,7 +187,7 @@ router.post(
         isSolidary: isSolidary || false, // Campo opcional para eventos solidarios
       });
       const saved = await newEvent.save();
-      const io: SocketIOServer = req.app.io;
+      const io = req.app.get("io") as SocketIOServer;
       io.emit("event:created", cleanEventDoc(saved));
       res.status(201).json({ id: saved._id });
     } catch (err) {
@@ -190,13 +203,20 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     try {
       const { id } = req.params;
+      const userId = (req as any).userId;
+
       const event = await EventModel.findById(id);
-      if (!event)
+      if (!event) {
         return res.status(404).json({ error: "Evento no encontrado" });
+      }
+
+      if (event.creator.toString() !== userId) {
+        return res.status(403).json({ error: "No autorizado" });
+      }
 
       await event.deleteOne();
 
-      const io: SocketIOServer = req.app.io;
+      const io = req.app.get("io") as SocketIOServer;
       io.emit("event:deleted", { id });
 
       res.json({ message: "Evento eliminado correctamente" });
@@ -205,162 +225,5 @@ router.delete(
     }
   }
 );
+
 export default router;
-// interface PopulatedParticipant {
-//   userId: {
-//     _id: string;
-//     name: string;
-//     surname: string;
-//     email: string;
-//   };
-// }
-
-// interface PopulatedEvent extends Document {
-//   _id: string;
-//   titleEvent: string;
-//   publicDescription: string;
-//   privateDescription: string;
-//   date: string;
-//   location: string;
-//   creationDate: Date;
-//   creator: {
-//     _id: string;
-//     name: string;
-//     surname: string;
-//     email: string;
-//     age: number;
-//     location: string;
-//     identify: string;
-//   };
-//   participants: PopulatedParticipant[];
-// }
-
-// router.get("/events", async (req: Request, res: Response) => {
-//   try {
-
-//     const { isSolidary } = req.query;
-
-//     // Construir query dinámicamente si se pasa el filtro
-//     const query: any = {};
-//     if (isSolidary !== undefined && typeof isSolidary === "string" ) {
-//       query.isSolidary = isSolidary === "true";
-//     }
-
-//     const events = await EventModel
-//       .find(query)
-//       .sort({ creationDate: -1 })
-//       .populate("creator", "-password -__v")
-//       .populate({
-//         path: "participants",
-//         select: "userId status",
-//         populate: { path: "userId", model: "User", select: "name email surname age location identify" }
-//       })
-//       .populate({
-//         path: "requests",
-//         select: "userId status _id",
-//         populate: { path: "userId", model: "User", select: "name email surname" }
-//       });
-
-//     const cleanEvents = (events as any[]).map(event => {
-//       const ev = event.toObject();
-//       return {
-//         ...ev,
-//         participants: ev.participants.map((p: any) => p.userId),
-//           isSolidary: ev.isSolidary, // 👈 Asegurate de que esté presente explícitamente
-//         requests:     ev.requests.map((r: any) => ({
-//           requestId: r._id,
-//           status:    r.status,
-//           user:      r.userId
-//         }))
-//       };
-//     });
-
-//     res.status(200).json(cleanEvents);
-//   } catch (err) {
-//     console.error("❌ Error al obtener eventos:", err);
-//     res.status(500).json({ error: "Error al obtener eventos" });
-//   }
-// });
-
-// router.delete(
-//   "/events/:id",
-//   authMiddleware,
-//   async (req: Request, res: Response): Promise<any> => {
-//     const { id } = req.params;
-//     const userId = (req as any).userId;
-
-//     try {
-//       if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
-//         return res.status(400).json({ error: "ID de evento inválido" });
-//       }
-
-//       const event = await EventModel.findById(id);
-
-//       if (!event) {
-//         return res.status(404).json({ error: "Evento no encontrado" });
-//       }
-
-//       if (event.creator.toString() !== userId) {
-//         return res
-//           .status(403)
-//           .json({ error: "No tienes permiso para eliminar este evento" });
-//       }
-
-//       await event.deleteOne();
-//       res.status(200).json({ message: "Evento eliminado correctamente" });
-//     } catch (error) {
-//       console.error("❌ Error al eliminar evento:", error);
-//       return res.status(500).json({ error: "Error al eliminar evento" });
-//     }
-//   }
-// );
-
-// router.patch(
-//   "/events/:id",
-//   async (req: Request, res: Response): Promise<any> => {
-//     const { id } = req.params;
-//     const {
-//       titleEvent,
-//       publicDescription,
-//       privateDescription,
-//       date,
-//       image,
-//       location,
-//     } = req.body;
-
-//     if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
-//       return res.status(400).json({ error: "ID de evento inválido" });
-//     }
-
-//     // if (date && isNaN(Date.parse(date))) {
-//     //   return res.status(400).json({ error: "Fecha inválida" });
-//     // }
-
-//     const updateFields: any = {};
-//     if (titleEvent !== undefined) updateFields.titleEvent = titleEvent;
-//     if (publicDescription !== undefined)
-//       updateFields.publicDescription = publicDescription;
-//     if (privateDescription !== undefined)
-//       updateFields.privateDescription = privateDescription;
-//     if (date !== undefined) updateFields.date = date;
-//     if (image !== undefined) updateFields.image = image;
-//     if (location !== undefined) updateFields.location = location;
-
-//     try {
-//       const updatedEvent = await EventModel.findByIdAndUpdate(
-//         id,
-//         updateFields,
-//         { new: true }
-//       );
-
-//       if (!updatedEvent) {
-//         return res.status(404).json({ error: "Evento no encontrado" });
-//       }
-
-//       return res.status(200).json(updatedEvent);
-//     } catch (error) {
-//       console.error("❌ Error al actualizar evento:", error);
-//       return res.status(500).json({ error: "Error al actualizar evento" });
-//     }
-//   }
-// );

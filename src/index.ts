@@ -5,12 +5,12 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 //Aquí estás importando ese router, y le das el nombre local userRoutes.
 //Ese nombre lo decides tú. Podrías llamarlo usuarios, miRouter, o cualquier otra cosa
-import userRoutes from "./routes/userRout";
-import eventRoutes from "./routes/eventRout";
-import loginRout from "./routes/loginRout";
+import userRoutes from "./routes/userRoute";
+import eventRoutes from "./routes/eventRoute";
+import loginRout from "./routes/loginRoute";
 import userGoogleRout from "./routes/userGoogleRout";
 import s3Routes from "./routes/s3";
-import eventRequestRoutes from "./routes/eventRequestRout";
+import eventRequestRoutes from "./routes/eventRequestRoute";
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import cors from "cors"; //Para permitir peticiones desde otros dominios
@@ -18,19 +18,16 @@ import helmet from "helmet"; //Para cabeceras de seguridad
 import morgan from "morgan"; //Para logs de peticiones HTTP
 import rateLimit from "express-rate-limit"; //Para limitar la tasa de peticiones, evita abusos.
 import { validateEnv } from "./types/config/env";
-
+import { setupSocketIO } from "./sockets/sockets"; // Importa tu handler de Socket.IO
 // Define una interfaz para app
 declare module "express-serve-static-core" {
   interface Application {
     io: SocketIOServer;
   }
 }
-
 dotenv.config();
 const env = validateEnv();
-
 const app = express();
-
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
@@ -38,10 +35,10 @@ const io = new SocketIOServer(server, {
     methods: ["GET", "POST", "PATCH", "DELETE"],
   },
 });
+setupSocketIO(io); // 💥 Aquí conectás el handler con el io
 
 // Hacelo accesible en las rutas
 app.set("io", io);
-
 //🛡️ En producción, deberías reemplazar "*" por el
 //  dominio real (ej: "https://friendzone.app").!!!!!!
 app.use(
@@ -50,9 +47,7 @@ app.use(
     methods: ["GET", "POST", "PATCH", "DELETE"],
   })
 );
-
 app.use(express.json());
-
 app.use(helmet());
 app.use(morgan("combined"));
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
@@ -61,14 +56,12 @@ app.use(limiter);
 app.get("/", (req, res) => {
   res.send("✅ Servidor funcionando");
 });
-
 app.use("/api/auth", loginRout);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/eventRequests", eventRequestRoutes);
-app.use("/api/userGoogle", userGoogleRout);
+app.use("/api/auth/google", userGoogleRout);
 app.use("/api/s3", s3Routes);
-
 // 4. Middleware global de errores
 // 4. Middleware global de errores
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {

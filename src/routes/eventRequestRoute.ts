@@ -3,7 +3,10 @@ import { EventRequestModel } from "../models/EventRequest";
 import mongoose from "mongoose";
 import { authMiddleware } from "../auth/authMiddleware";
 import { AuthRequest } from "../types/express";
-
+import {
+  emitToCreator,
+  emitToUser,
+} from "../sockets/forEventRequest/eventEmmiters";
 const router = express.Router();
 
 interface GetStatusQuery {
@@ -19,7 +22,7 @@ interface UpdateRequestBody {
 router.post(
   "/",
   authMiddleware,
-  async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  async (req: AuthRequest, res: Response, next: NextFunction): Promise<any> => {
     try {
       const userId = (req as any).userId; // ✅ obtenido del token
 
@@ -41,6 +44,27 @@ router.post(
       const request = new EventRequestModel({ userId, eventId });
       const requestSaved = await request.save();
 
+      // 1. Accedé a io
+      const io = req.app.get("io");
+
+      // 2. Traé el evento y su creador
+      const event = await mongoose
+        .model("Event")
+        .findById(eventId)
+        .populate("creator");
+
+      if (event && event.creator) {
+        const creatorId = event.creator._id.toString();
+
+        // 3. Emití a la room del creador
+        io.to(creatorId).emit("request:created", {
+          eventId,
+          requestId: requestSaved._id,
+          userId,
+        });
+        console.log(`📢 request:created emitido a ${creatorId}`);
+      }
+
       return res.status(201).json({ id: requestSaved._id });
     } catch (error) {
       next(error);
@@ -51,12 +75,14 @@ router.post(
 router.get(
   "/",
   authMiddleware,
-  async (req: Request, res: Response): Promise<void> => {
+  async (req: AuthRequest, res: Response): Promise<void> => {
     const userId = (req as any).userId;
     const eventId = req.query.eventId as string;
 
     if (!userId || !eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
-      res.status(400).json({ message: "userId y eventId válidos son requeridos." });
+      res
+        .status(400)
+        .json({ message: "userId y eventId válidos son requeridos." });
       return;
     }
 
@@ -132,7 +158,21 @@ router.patch(
       if (!updated) {
         return res.status(404).json({ message: "Solicitud no encontrada." });
       }
-console.log("esto es updated", updated)
+      const io = req.app.get("io");
+
+      await emitToCreator(io, updated.eventId.toString(), "request:updated", {
+        requestId: updated._id,
+        eventId: updated.eventId,
+        userId: updated.userId,
+        status: updated.status,
+      });
+
+      await emitToUser(io, updated.userId.toString(), "request:statusChanged", {
+        requestId: updated._id,
+        eventId: updated.eventId,
+        status: updated.status,
+      });
+
       return res.json(updated);
     } catch (error) {
       next(error);
@@ -165,8 +205,17 @@ router.delete(
       if (!deleted) {
         return res.status(404).json({ message: "Solicitud no encontrada." });
       }
+    
+      const io = req.app.get("io");
 
-      return res.json({ message: "OK!" });
+      await emitToCreator(io, deleted.eventId.toString(), "request:deleted", {
+        requestId: deleted._id,
+        eventId: deleted.eventId,
+        userId: deleted.userId,
+        status: deleted.status,
+      });
+     res.status(200).json({ message: "OK!" })
+     return;
     } catch (error) {
       next(error);
     }
