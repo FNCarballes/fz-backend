@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import { EventModel } from "../../models/Events";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
-import {eventQuerySchema} from "../../models/schemas/eventQuerySchema";
+import {eventQuerySchema} from "../../models/schemasZod/events/eventQuerySchema";
 import { z } from "zod";
 import { AuthRequest } from "../../types/express/index";
 

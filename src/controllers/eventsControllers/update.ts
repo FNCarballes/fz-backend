@@ -3,7 +3,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { EventModel } from "../../models/Events";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { AuthRequest } from "../../types/express/index";
-import {updateEventSchema} from "../../models/schemas/UpdateEventSchema";
+import {updateEventSchema} from "../../models/schemasZod/events/UpdateEventSchema";
 
 export const updateEventController =  async (  req: AuthRequest<{ id: string }>,
  res: Response, next: NextFunction): Promise<void> => {

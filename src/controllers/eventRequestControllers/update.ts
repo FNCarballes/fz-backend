@@ -5,7 +5,7 @@ import { EventModel } from "../../models/Events";
 import {
   CreateEventRequestInput,
   UpdateEventRequestInput,
-} from "../../models/schemas/EventRequestSchema";
+} from "../../models/schemasZod/eventsRequest/EventRequestSchema";
 import {
   emitToCreator,
   emitToUser,

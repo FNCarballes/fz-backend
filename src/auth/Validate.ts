@@ -1,6 +1,6 @@
 // middleware/validate.ts
 import type { Request, Response, NextFunction } from "express";
-import { ZodType, ZodError } from "zod";
+import { ZodType } from "zod";
 
 // Middleware para validar body + query + params juntos
 export function validate(schema: ZodType<any, any, any>) {

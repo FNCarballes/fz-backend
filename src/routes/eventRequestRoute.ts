@@ -4,7 +4,7 @@ import {
   createEventRequestSchema,
   updateEventRequestSchema,
   deleteEventRequestSchema,
-} from "../models/schemas/EventRequestSchema";
+} from "../models/schemasZod/eventsRequest/EventRequestSchema";
 import { validate } from "../auth/Validate";
 import { validateParams } from "../auth/Validate";
 import { postEventRequestController } from "../controllers/eventRequestControllers/create";
