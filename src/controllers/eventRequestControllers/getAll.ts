@@ -2,16 +2,16 @@ import { AuthRequest } from "../../types/express";
 import mongoose from "mongoose";
 import { EventRequestModel } from "../../models/EventRequest";
 import { Response } from "express";
-
+import { EventModel } from "../../models/Events";
 type GetRequestQuery = {
   eventId: string;
-};
+};  
 //trae todas las solicitudes de un evento. Lo usa solo el creador del evento
 export const getEventRequestsController = async (
- req: AuthRequest<{}, {}, {}, GetRequestQuery> , // tipa el cuarto genérico de AuthRequest, que es para Query.
+  req: AuthRequest<{}, {}, {}, GetRequestQuery>, // tipa el cuarto genérico de AuthRequest, que es para Query.
   res: Response
 ): Promise<void> => {
-  const userId = (req as any).userId;
+  const userId = req.userId;
   const eventId = req.query.eventId;
 
   if (!userId || !eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
@@ -22,10 +22,21 @@ export const getEventRequestsController = async (
   }
 
   try {
-    const requests = await EventRequestModel.find({ eventId }).populate(
-      "userId",
-      "name surname email"
-    );
+
+    const event = await EventModel.findById(eventId);
+    if (!event) {
+      res.status(404).json({ message: "Evento no encontrado." });
+      return;
+    }
+
+    if (event.creator.toString() !== userId) {
+      res.status(403).json({ message: "No estás autorizado a ver estas solicitudes." });
+      return;
+    }
+
+    const requests = await EventRequestModel.find({ eventId })
+      .sort({ createdAt: -1 })
+      .populate("userId", "name surname email");
     res.json(requests);
   } catch (error) {
     console.error("❌ Error al obtener solicitudes de evento:", error);

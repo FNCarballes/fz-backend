@@ -1,11 +1,15 @@
+// src/controllers/eventsControllers/delete.ts
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
 import { EventModel } from "../../models/Events";
+import { AuthRequest } from "../../types/express";
 
-export const deleteEventController =   async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+type DeleteEventParams = { id: string };
+
+export const deleteEventController =   async (req: AuthRequest<DeleteEventParams>, res: Response, next: NextFunction): Promise<any> => {
     try {
-      const { id } = req.params;
-      const userId = (req as any).userId;
+      const  {id}  = req.params;
+      const userId = req.userId;
 
       const event = await EventModel.findById(id);
       if (!event) {

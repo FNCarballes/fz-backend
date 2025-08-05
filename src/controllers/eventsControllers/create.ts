@@ -1,8 +1,9 @@
+// src/controllers/eventsControllers/create.ts
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
 import { EventModel } from "../../models/Events";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
-import { CreateEventInput } from "../../models/CreateEventSchema";
+import { CreateEventInput } from "../../models/schemas/CreateEventSchema";
 import { AuthRequest } from "../../types/express/index";
 import { emitToAll } from "../../sockets/forEventRequest/eventEmmiters";
 export const createEventController = async (

@@ -5,12 +5,12 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 //Aquí estás importando ese router, y le das el nombre local userRoutes.
 //Ese nombre lo decides tú. Podrías llamarlo usuarios, miRouter, o cualquier otra cosa
-import userRoutes from "./routes/userRoute";
-import eventRoutes from "./routes/eventRoute";
-import loginRout from "./routes/loginRoute";
-import userGoogleRout from "./routes/userGoogleRout";
+import userRoute from "./routes/userRoute";
+import eventRoute from "./routes/eventRoute";
+import loginRoute from "./routes/loginRoute";
+import userGoogleRoute from "./routes/userGoogleRout";
 import s3Routes from "./routes/s3";
-import eventRequestRoutes from "./routes/eventRequestRoute";
+import eventRequestRoute from "./routes/eventRequestRoute";
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import cors from "cors"; //Para permitir peticiones desde otros dominios
@@ -56,13 +56,12 @@ app.use(limiter);
 app.get("/", (req, res) => {
   res.send("✅ Servidor funcionando");
 });
-app.use("/api/auth", loginRout);
-app.use("/api/users", userRoutes);
-app.use("/api/events", eventRoutes);
-app.use("/api/eventRequests", eventRequestRoutes);
-app.use("/api/auth/google", userGoogleRout);
+app.use("/api/auth", loginRoute);
+app.use("/api/users", userRoute);
+app.use("/api/events", eventRoute);
+app.use("/api/eventRequests", eventRequestRoute);
+app.use("/api/auth/google", userGoogleRoute);
 app.use("/api/s3", s3Routes);
-// 4. Middleware global de errores
 // 4. Middleware global de errores
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("❌ Error no manejado:", err.stack || err);

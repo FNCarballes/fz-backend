@@ -5,13 +5,15 @@ import { EventModel } from "../../models/Events";
 import {
   CreateEventRequestInput,
   UpdateEventRequestInput,
-} from "../../models/EventRequestSchema";
+} from "../../models/schemas/EventRequestSchema";
 import {
   emitToCreator,
   emitToUser,
 } from "../../sockets/forEventRequest/eventEmmiters";
+import mongoose from "mongoose";
+import { AuthRequest } from "../../types/express";
 export const patchEventRequestController = async (
-  req: Request<{ requestId: string }, {}, UpdateEventRequestInput>,
+  req: AuthRequest<{ requestId: string }, {}, UpdateEventRequestInput>,
   res: Response,
   next: NextFunction
 ): Promise<any> => {
@@ -19,8 +21,10 @@ export const patchEventRequestController = async (
     const { requestId } = req.params;
     const { status } = req.body; // ✅ ya validado por Zod
 
-    const userId = (req as any).userId;
-
+    const userId = req.userId;
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res.status(400).json({ message: "requestId inválido." });
+    }
     // 1. Buscar la solicitud para obtener el eventId
     const existingRequest = await EventRequestModel.findById(requestId);
     if (!existingRequest) {
@@ -52,14 +56,14 @@ export const patchEventRequestController = async (
 
     const io = req.app.get("io");
 
-    await emitToCreator(io, updated.eventId.toString(), "request:updated", {
+    emitToCreator(io, updated.eventId.toString(), "request:updated", {
       requestId: updated._id,
       eventId: updated.eventId,
       userId: updated.userId,
       status: updated.status,
     });
 
-    await emitToUser(io, updated.userId.toString(), "request:statusChanged", {
+    emitToUser(io, updated.userId.toString(), "request:statusChanged", {
       requestId: updated._id,
       eventId: updated.eventId,
       status: updated.status,

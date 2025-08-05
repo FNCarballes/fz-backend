@@ -1,3 +1,4 @@
+// src/utils/cleanEventDoc.ts
 import type { IEvent } from "../models/Events";
 
 export function cleanEventDoc(doc: IEvent) {
@@ -17,8 +18,10 @@ export function cleanEventDoc(doc: IEvent) {
 
     // Como la virtual `participants` ya trae la subdocumento completo,
     // aquí sólo extraemos userId:
-    participants: ev.participants?.map((p: any) => p.userId) || [],
 
+    participants: Array.isArray(ev.participants)
+      ? ev.participants.map((p: { userId: any }) => p.userId)
+      : [],
     // Y requests virtuales pasadas a tu forma:
     requests:
       ev.requests.map((r: any) => ({
@@ -29,10 +32,3 @@ export function cleanEventDoc(doc: IEvent) {
   };
 }
 
-export function parseBooleanQuery(value: any): boolean | undefined {
-  if (value === undefined) return undefined;
-  const v = String(value).toLowerCase().trim();
-  if (v === "true") return true;
-  if (v === "false") return false;
-  return undefined; // o lanzar error de validación
-}

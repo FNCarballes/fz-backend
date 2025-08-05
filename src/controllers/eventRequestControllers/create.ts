@@ -1,7 +1,7 @@
 // src/controllers/EventRequestController.ts
 import { EventRequestModel } from "../../models/EventRequest";
 import { AuthRequest } from "../../types/express";
-import { CreateEventRequestInput } from "../../models/EventRequestSchema";
+import { CreateEventRequestInput } from "../../models/schemas/EventRequestSchema";
 import mongoose from "mongoose";
 import { Response, NextFunction } from "express";
 

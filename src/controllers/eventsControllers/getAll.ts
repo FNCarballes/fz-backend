@@ -1,19 +1,26 @@
+// src/controllers/eventsControllers/getAll.ts
 import { Request, Response, NextFunction } from "express";
 import { EventModel } from "../../models/Events";
-import { cleanEventDoc, parseBooleanQuery } from "../../utils/cleanEventDoc";
+import { cleanEventDoc } from "../../utils/cleanEventDoc";
+import {eventQuerySchema} from "../../models/schemas/eventQuerySchema";
+import { z } from "zod";
+import { AuthRequest } from "../../types/express/index";
 
-export const getAllEventsController = async (req: Request, res: Response, next: NextFunction) => {
+
+export const getAllEventsController = async (  req: Request,
+ res: Response, next: NextFunction) => {
   try {
+        const query = eventQuerySchema.parse(req.query); // ⚠️ casteamos aquí con seguridad
+
+        const { page, limit, isSolidary } = query;
+
     // 1) Filtrado booleano
-    const isSolidary = parseBooleanQuery(req.query.isSolidary);
-    const query: any = {};
+     const mongoQuery: any = {};
     if (typeof isSolidary === "boolean") {
-      query.isSolidary = isSolidary;
+      mongoQuery.isSolidary = isSolidary;
     }
 
     // 2) Paginación
-    const page = Math.max(1, parseInt(req.query.page as string) || 1);
-    const limit = Math.max(1, parseInt(req.query.limit as string) || 20);
     const skip = (page - 1) * limit;
 
     // 3) Conteo total

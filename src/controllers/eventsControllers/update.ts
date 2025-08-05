@@ -2,12 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
 import { EventModel } from "../../models/Events";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
+import { AuthRequest } from "../../types/express/index";
+import {updateEventSchema} from "../../models/schemas/UpdateEventSchema";
 
-
-export const updateEventController =  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateEventController =  async (  req: AuthRequest<{ id: string }>,
+ res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const userId = (req as any).userId;
+      const userId = req.userId;
 
       const event = await EventModel.findById(id);
       if (!event) {
@@ -20,9 +22,12 @@ export const updateEventController =  async (req: Request, res: Response, next: 
         return;
       }
 
-      // Autorizado => actualizar campos
-      Object.assign(event, req.body);
-      const updated = await event.save();
+    // Validamos el body con Zod (esto lanza si hay error)
+    const data = updateEventSchema.parse(req.body);
+
+    // Aplicamos solo los campos válidos
+    Object.assign(event, data);
+    const updated = await event.save();
 
       const io = req.app.get("io") as SocketIOServer;
       io.emit("event:updated", cleanEventDoc(updated));

@@ -1,15 +1,17 @@
-// routes/eventRput.ts
+// routes/eventRoute.ts
 import { Router} from "express";
-import { authMiddleware } from "../auth/authMiddleware";
+import { authMiddleware } from "../auth/middlewares/authMiddleware";
 import type { IEvent } from "../models/Events";
 import {
   createEventSchema,
-} from "../models/CreateEventSchema";
+} from "../models/schemas/CreateEventSchema";
 import { validate } from "../auth/Validate";
 import {createEventController} from "../controllers/eventsControllers/create";
 import { updateEventController } from "../controllers/eventsControllers/update";
 import { deleteEventController } from "../controllers/eventsControllers/delete";
 import { getAllEventsController } from "../controllers/eventsControllers/getAll";
+import { validateQuery } from "../auth/middlewares/validateQuery";
+import { eventQuerySchema } from "../models/schemas/eventQuerySchema";
 const router = Router();
 
 //Usar un Router limpio, sin lógica de Socket.IO embebida.
@@ -25,42 +27,42 @@ const router = Router();
 // Helper para limpiar eventos
 // cleanEventDoc
 // Aísla la lógica de “transformar” los documentos de Mongo a tu forma de JSON, incluyendo isSolidary.
-export function cleanEventDoc(doc: IEvent) {
-  const ev = doc.toObject(); // o doc.toJSON()
+// export function cleanEventDoc(doc: IEvent) {
+//   const ev = doc.toObject(); // o doc.toJSON()
 
-  return {
-    _id: ev._id,
-    titleEvent: ev.titleEvent,
-    publicDescription: ev.publicDescription,
-    privateDescription: ev.privateDescription,
-    date: ev.date,
-    image: ev.image,
-    location: ev.location,
-    creationDate: ev.creationDate,
-    creator: ev.creator,
-    isSolidary: ev.isSolidary,
+//   return {
+//     _id: ev._id,
+//     titleEvent: ev.titleEvent,
+//     publicDescription: ev.publicDescription,
+//     privateDescription: ev.privateDescription,
+//     date: ev.date,
+//     image: ev.image,
+//     location: ev.location,
+//     creationDate: ev.creationDate,
+//     creator: ev.creator,
+//     isSolidary: ev.isSolidary,
 
-    // Como la virtual `participants` ya trae la subdocumento completo,
-    // aquí sólo extraemos userId:
-    participants: ev.participants?.map((p: any) => p.userId) || [],
+//     // Como la virtual `participants` ya trae la subdocumento completo,
+//     // aquí sólo extraemos userId:
+//     participants: ev.participants?.map((p: any) => p.userId) || [],
 
-    // Y requests virtuales pasadas a tu forma:
-    requests:
-      ev.requests.map((r: any) => ({
-        requestId: r._id,
-        status: r.status,
-        user: r.userId,
-      })) || [],
-  };
-}
+//     // Y requests virtuales pasadas a tu forma:
+//     requests:
+//       ev.requests.map((r: any) => ({
+//         requestId: r._id,
+//         status: r.status,
+//         user: r.userId,
+//       })) || [],
+//   };
+// }
 
-function parseBooleanQuery(value: any): boolean | undefined {
-  if (value === undefined) return undefined;
-  const v = String(value).toLowerCase().trim();
-  if (v === "true") return true;
-  if (v === "false") return false;
-  return undefined; // o lanzar error de validación
-}
+// function parseBooleanQuery(value: any): boolean | undefined {
+//   if (value === undefined) return undefined;
+//   const v = String(value).toLowerCase().trim();
+//   if (v === "true") return true;
+//   if (v === "false") return false;
+//   return undefined; // o lanzar error de validación
+// }
 
 router.post(
   "/",
@@ -103,9 +105,11 @@ router.post(
   // }
 
 // GET /api/events?isSolidary=true|false
-router.get("/",
+router.get(
+  "/",
+  validateQuery(eventQuerySchema),
   getAllEventsController
- );
+);
 
 // PATCH /api/events/:id
 router.patch(

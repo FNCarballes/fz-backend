@@ -1,10 +1,10 @@
 import express from "express";
-import { authMiddleware } from "../auth/authMiddleware";
+import { authMiddleware } from "../auth/middlewares/authMiddleware";
 import {
   createEventRequestSchema,
   updateEventRequestSchema,
   deleteEventRequestSchema,
-} from "../models/EventRequestSchema";
+} from "../models/schemas/EventRequestSchema";
 import { validate } from "../auth/Validate";
 import { validateParams } from "../auth/Validate";
 import { postEventRequestController } from "../controllers/eventRequestControllers/create";
@@ -12,7 +12,10 @@ import { getEventRequestsController } from "../controllers/eventRequestControlle
 import { getStatusEventRequestController } from "../controllers/eventRequestControllers/getStatus";
 import { patchEventRequestController } from "../controllers/eventRequestControllers/update";
 import { deleteEventRequestController } from "../controllers/eventRequestControllers/delete";
-
+import {
+  limitPostEventRequest,
+  limitPatchEventRequest,
+} from "../auth/middlewares/rateLimiters";
 const router = express.Router();
 
 // interface UpdateRequestBody {
@@ -32,6 +35,7 @@ const router = express.Router();
 router.post(
   "/",
   authMiddleware,
+  limitPostEventRequest,
   validate(createEventRequestSchema),
   postEventRequestController
 );
@@ -130,6 +134,7 @@ router.get("/status", authMiddleware, getStatusEventRequestController);
 router.patch(
   "/:requestId",
   authMiddleware,
+  limitPatchEventRequest,
   validate(updateEventRequestSchema), // ← ¡Acá entra Zod!
   patchEventRequestController
 );

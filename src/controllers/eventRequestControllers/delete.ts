@@ -15,7 +15,7 @@ export const deleteEventRequestController = async (
   const userId = req.userId; // ✅ viene del token por authMiddleware
   const { requestId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(requestId)) {
-    res.status(400).json({ message: "eventId inválido." });
+    res.status(400).json({ message: "requestId inválido." });
     return;
   }
   try {
