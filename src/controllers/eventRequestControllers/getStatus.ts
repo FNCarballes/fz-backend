@@ -1,5 +1,5 @@
 import { Response, NextFunction } from "express";
-import { EventRequestModel } from "../../models/EventRequest";
+import { EventRequestModel } from "../../models/EventRequestModel";
 import { AuthRequest } from "../../types/express/index";
 import mongoose from "mongoose";
 interface GetStatusQuery {

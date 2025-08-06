@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { UserModel } from "../../models/User";
+import { UserModel } from "../../models/UserModel";
 export const createUserController = async (
   req: Request,
   res: Response

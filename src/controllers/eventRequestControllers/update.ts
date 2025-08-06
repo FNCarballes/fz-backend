@@ -1,7 +1,7 @@
 // src/controllers/eventRequestControllers/update.ts
 import express, { Request, Response, NextFunction } from "express";
-import { EventRequestModel } from "../../models/EventRequest";
-import { EventModel } from "../../models/Events";
+import { EventRequestModel } from "../../models/EventRequestModel";
+import { EventModel } from "../../models/EventsModel";
 import {
   CreateEventRequestInput,
   UpdateEventRequestInput,

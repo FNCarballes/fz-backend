@@ -1,7 +1,7 @@
 // routes/eventRoute.ts
 import { Router} from "express";
 import { authMiddleware } from "../auth/middlewares/authMiddleware";
-import type { IEvent } from "../models/Events";
+import type { IEvent } from "../models/EventsModel";
 import {
   createEventSchema,
 } from "../models/schemasZod/events/CreateEventSchema";

@@ -1,7 +1,7 @@
 // src/controllers/eventsControllers/create.ts
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
-import { EventModel } from "../../models/Events";
+import { EventModel } from "../../models/EventsModel";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { CreateEventInput } from "../../models/schemasZod/events/CreateEventSchema";
 import { AuthRequest } from "../../types/express/index";

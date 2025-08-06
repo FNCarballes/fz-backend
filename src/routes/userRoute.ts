@@ -1,7 +1,7 @@
 //userRoute.ts
 import express from "express";
 import { authMiddleware } from "../auth/middlewares/authMiddleware";
-import "../models/Events"; // Importar solo para registrar el modelo
+import "../models/EventsModel"; // Importar solo para registrar el modelo
 import { createUserController } from "../controllers/usersControllers/create";
 import { validate } from "../auth/Validate";
 import { createUserSchema } from "../models/schemasZod/users/createUserSchema";

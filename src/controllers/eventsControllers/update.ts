@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
-import { EventModel } from "../../models/Events";
+import { EventModel } from "../../models/EventsModel";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { AuthRequest } from "../../types/express/index";
 import {updateEventSchema} from "../../models/schemasZod/events/UpdateEventSchema";

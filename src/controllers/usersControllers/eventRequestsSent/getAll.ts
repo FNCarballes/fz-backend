@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { UserModel } from "../../../models/User";
+import { UserModel } from "../../../models/UserModel";
 import { AuthRequest } from "../../../types/express";
   
  export const getEventRequestsSentController = async (req: AuthRequest, res: Response): Promise<void> => {

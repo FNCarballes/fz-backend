@@ -1,7 +1,7 @@
 // src/controllers/usersControllers/eventRequestsSent/create.ts
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { UserModel } from "../../../models/User";
+import { UserModel } from "../../../models/UserModel";
 
 
 export const postEventRequestController = async (req: Request, res: Response): Promise<void> => {

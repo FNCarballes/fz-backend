@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 //Se importa el modelo de usuario de Mongoose.
 //Se renombra el modelo (UserModel) como User para usarlo en el código más fácilmente.
-import { UserModel as User } from "../models/User"; // Asegúrate de tipar el modelo adecuadamente
+import { UserModel as User } from "../models/UserModel"; // Asegúrate de tipar el modelo adecuadamente
 //Importa una interfaz de TypeScript que define la estructura de un usuario
 // (IUser) para garantizar que el objeto tiene las propiedades esperadas, como email, password, etc.
 import { IUser } from "../types/userTypes"; // Asumiendo que defines esta interfaz
@@ -28,7 +28,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      res.status(401).json({ message: "Contraseña incorrecta" });
+      res.status(401).json({ message: "Credenciales inválidas" });
       return;
     }
 

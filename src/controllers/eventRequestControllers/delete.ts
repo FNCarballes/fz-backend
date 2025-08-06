@@ -1,6 +1,6 @@
 // src/controllers/eventRequestControllers/delete.ts
-import { EventRequestModel } from "../../models/EventRequest";
-import { EventModel, IEvent } from "../../models/Events";
+import { EventRequestModel } from "../../models/EventRequestModel";
+import { EventModel, IEvent } from "../../models/EventsModel";
 import { Response } from "express";
 import { AuthRequest } from "../../types/express";
 import { emitToCreator } from "../../sockets/forEventRequest/eventEmmiters";

@@ -1,6 +1,14 @@
 import rateLimit from "express-rate-limit";
 import "../models/Events"; // Importar solo para registrar el modelo
 import { AuthRequest } from "../../types/express";
+
+//FOR LOGIN
+export const loginRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 5, // máximo 5 intentos por IP por minuto
+  message: { error: "Demasiados intentos de login. Intenta más tarde." },
+});
+
 //FOR USERS AND REQUESTSENT
 
 export const limitCreateUser = rateLimit({

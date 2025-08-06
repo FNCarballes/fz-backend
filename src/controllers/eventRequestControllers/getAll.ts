@@ -1,8 +1,8 @@
 import { AuthRequest } from "../../types/express";
 import mongoose from "mongoose";
-import { EventRequestModel } from "../../models/EventRequest";
+import { EventRequestModel } from "../../models/EventRequestModel";
 import { Response } from "express";
-import { EventModel } from "../../models/Events";
+import { EventModel } from "../../models/EventsModel";
 type GetRequestQuery = {
   eventId: string;
 };  

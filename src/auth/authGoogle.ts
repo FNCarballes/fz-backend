@@ -1,7 +1,7 @@
 //authGoogle.ts
 import { OAuth2Client } from "google-auth-library";
 import { Request, Response } from "express";
-import { UserModel } from "../models/User";
+import { UserModel } from "../models/UserModel";
 import jwt from "jsonwebtoken";
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 export const loginWithGoogle = async (req: Request, res: Response): Promise<any> => {

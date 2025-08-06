@@ -1,5 +1,5 @@
 // src/utils/cleanEventDoc.ts
-import type { IEvent } from "../models/Events";
+import type { IEvent } from "../models/EventsModel";
 
 export function cleanEventDoc(doc: IEvent) {
   const ev = doc.toObject(); // o doc.toJSON()

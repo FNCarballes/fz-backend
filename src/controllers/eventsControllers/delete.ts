@@ -1,7 +1,7 @@
 // src/controllers/eventsControllers/delete.ts
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
-import { EventModel } from "../../models/Events";
+import { EventModel } from "../../models/EventsModel";
 import { AuthRequest } from "../../types/express";
 
 type DeleteEventParams = { id: string };

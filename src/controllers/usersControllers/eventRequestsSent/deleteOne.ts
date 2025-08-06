@@ -1,7 +1,7 @@
 // src/controllers/usersControllers/eventRequestsSent/deleteOne.ts
 import {  Response } from "express";
 import { AuthRequest } from "../../../types/express";  
-import { UserModel } from "../../../models/User";
+import { UserModel } from "../../../models/UserModel";
 
 type DeleteUserParams = {
   eventId: string;
