@@ -39,18 +39,20 @@ export const postEventRequestController = async (
       .model("Event")
       .findById(eventId)
       .populate("creator");
+if (event && event.creator) {
+  const creatorId =
+    typeof event.creator === "object" && "_id" in event.creator
+      ? event.creator._id.toString()
+      : event.creator.toString();
 
-    if (event && event.creator) {
-      const creatorId = event.creator._id.toString();
+  io.to(creatorId).emit("request:created", {
+    eventId,
+    requestId: requestSaved._id,
+    userId,
+  });
+  logger.info(`📢 request:created emitido a ${creatorId}`);
+}
 
-      // 3. Emití a la room del creador
-      io.to(creatorId).emit("request:created", {
-        eventId,
-        requestId: requestSaved._id,
-        userId,
-      });
-      logger.info(`📢 request:created emitido a ${creatorId}`);
-    }
 
     res.status(201).json({ id: requestSaved._id });
   } catch (error) {

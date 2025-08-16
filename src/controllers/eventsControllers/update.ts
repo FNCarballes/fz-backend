@@ -5,11 +5,11 @@ import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { AuthRequest } from "../../types/express/index";
 import {updateEventSchema} from "../../models/schemasZod/events/UpdateEventSchema";
 import {logger} from "../../utils/logger/logger"
-export const updateEventController =  async (  req: AuthRequest<{ id: string }>,
+export const updateEventController =  async (  req: Request<{ id: string }>,
  res: Response, next: NextFunction): Promise<void> => {
     try {
       const { id } = req.params;
-      const userId = req.userId;
+  const userId = (req as any).userId;
 
       const event = await EventModel.findById(id);
       if (!event) {

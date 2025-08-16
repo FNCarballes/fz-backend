@@ -12,7 +12,9 @@ const privateKey = fs.readFileSync(
 export const generateTokens = async (
   userId: string,
   email: string,
-  userAgent: string
+  userAgent: string,
+  ip: string,
+  device: string = "unknown"
 ) => {
   const accessToken = jwt.sign({ id: userId, email }, privateKey, {
     algorithm: "RS256",
@@ -32,7 +34,9 @@ export const generateTokens = async (
     token: refreshToken,
     userId,
     expiresAt,
-    device: userAgent || "unknown",
+    userAgent: userAgent || "unknown",
+    ip: ip || "unknown",
+    device: device || userAgent || "unknown",
   });
   return { accessToken, refreshToken };
 };

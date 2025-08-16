@@ -12,12 +12,12 @@ import {
 import mongoose from "mongoose";
 import { AuthRequest } from "../../types/express";
 export const patchEventRequestController = async (
-  req: AuthRequest<{ requestId: string }, {}, UpdateEventRequestInput>,
+  req: AuthRequest<{}, {}, UpdateEventRequestInput>,
   res: Response,
   next: NextFunction
 ): Promise<any> => {
   try {
-    const { requestId } = req.params;
+    const { requestId } = (req as any).params;
     const { status } = req.body; // ✅ ya validado por Zod
 
     const userId = req.userId;
@@ -37,11 +37,12 @@ export const patchEventRequestController = async (
     }
 
     // 3. Verificar si el userId coincide con el creador
-    if (event.creator.toString() !== userId) {
+    if (!event.creator || event.creator.toString() !== userId) {
       return res
         .status(403)
         .json({ message: "No autorizado para modificar esta solicitud." });
     }
+
 
     const updated = await EventRequestModel.findByIdAndUpdate(
       requestId,
@@ -55,14 +56,14 @@ export const patchEventRequestController = async (
 
     const io = req.app.get("io");
 
-    emitToCreator(io, updated.eventId.toString(), "request:updated", {
+    emitToCreator( updated.eventId.toString(), "request:updated", {
       requestId: updated._id,
       eventId: updated.eventId,
       userId: updated.userId,
       status: updated.status,
     });
 
-    emitToUser(io, updated.userId.toString(), "request:statusChanged", {
+    emitToUser(updated.userId.toString(), "request:statusChanged", {
       requestId: updated._id,
       eventId: updated.eventId,
       status: updated.status,

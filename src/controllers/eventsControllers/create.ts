@@ -8,7 +8,7 @@ import { AuthRequest } from "../../types/express/index";
 import { emitToAll } from "../../sockets/forEventRequest/eventEmmiters";
 import {logger} from "../../utils/logger/logger"
 export const createEventController = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
@@ -24,7 +24,7 @@ export const createEventController = async (
       location,
       isSolidary,
     } = input;
-    const userId = req.userId;
+  const userId = (req as any).userId;
     const newEvent = new EventModel({
       titleEvent,
       publicDescription,
@@ -38,7 +38,7 @@ export const createEventController = async (
     });
     const saved = await newEvent.save();
     const io = req.app.get("io") as SocketIOServer;
-    emitToAll(io, "event:created", cleanEventDoc(saved));
+    emitToAll("event:created", cleanEventDoc(saved));
 
     res.status(201).json({ id: saved._id });
   } catch (err) {

@@ -34,11 +34,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     if (user && validPassword) {
-      const { accessToken, refreshToken } = await generateTokens(
-        user._id.toString(),
-        user.email,
-        user.userAgent || "unknown" // Asegúrate de que userAgent esté definido
-      );
+   const { accessToken, refreshToken } = await generateTokens(
+  user._id.toString(),
+  user.email,
+  req.headers['user-agent'] || "unknown",
+  req.ip || "unknown",
+  "login-device" // Puedes ajustar el nombre del dispositivo si lo tienes
+);
 
       const userId = user._id.toString(); // Convierte el ObjectId a string
       const userName = user.name; // Convierte el ObjectId a string

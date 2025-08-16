@@ -1,10 +1,10 @@
 // routes/eventRoute.ts
 import { Router} from "express";
 import { authMiddleware } from "../auth/middlewares/authMiddleware";
-import type { IEvent } from "../models/EventsModel";
 import {
   createEventSchema,
 } from "../models/schemasZod/events/CreateEventSchema";
+import {updateEventSchema} from "../models/schemasZod/events/UpdateEventSchema";
 import { validate } from "../auth/Validate";
 import {createEventController} from "../controllers/eventsControllers/create";
 import { updateEventController } from "../controllers/eventsControllers/update";
@@ -30,7 +30,7 @@ router.get(
 router.patch(
   "/:id",
   authMiddleware,
-  validate(createEventSchema),
+  validate(updateEventSchema),
  updateEventController
 );
 // DELETE /api/events/:id

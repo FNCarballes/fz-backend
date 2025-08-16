@@ -39,7 +39,9 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
     const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
       payload.id,
       payload.email || "",
-      userAgent
+      userAgent,
+      req.ip || "unknown",
+      "refresh-device"
     );
 
     res.json({ accessToken, refreshToken: newRefreshToken });

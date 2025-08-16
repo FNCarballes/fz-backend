@@ -1,10 +1,13 @@
 import pino from "pino";
 
 const isDev = process.env.NODE_ENV !== "production";
+const isTest = process.env.NODE_ENV === "test";
 
 export const logger = pino({
-  level: isDev ? "debug" : "info", // En prod evita debug innecesario
-  transport: isDev
+  level: isDev ? "debug" : "info",
+  transport: isTest
+    ? undefined
+    : isDev
     ? {
         target: "pino-pretty",
         options: {

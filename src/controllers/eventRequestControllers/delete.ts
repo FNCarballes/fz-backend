@@ -10,11 +10,11 @@ type DeleteParams = {
   requestId: string;
 };
 export const deleteEventRequestController = async (
-  req: AuthRequest<DeleteParams>,
+  req: AuthRequest,
   res: Response
 ): Promise<void> => {
   const userId = req.userId; // ✅ viene del token por authMiddleware
-  const { requestId } = req.params;
+  const { requestId } = (req as any).params;
   if (!mongoose.Types.ObjectId.isValid(requestId)) {
     res.status(400).json({ message: "requestId inválido." });
     return;
@@ -50,7 +50,7 @@ export const deleteEventRequestController = async (
 
     // 5. Emitimos evento por sockets al creador
     const io = req.app.get("io");
-    await emitToCreator(io, event._id.toString(), "request:deleted", {
+    await emitToCreator( event._id.toString(), "request:deleted", {
       requestId,
       eventId: event._id,
       userId: request.userId,

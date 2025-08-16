@@ -1,6 +1,5 @@
 // src/controllers/usersControllers/eventRequestsSent/deleteOne.ts
-import {  Response } from "express";
-import { AuthRequest } from "../../../types/express";  
+import { Request, Response } from "express";
 import { UserModel } from "../../../models/UserModel";
 import {logger} from "../../../utils/logger/logger"
 type DeleteUserParams = {
@@ -8,8 +7,11 @@ type DeleteUserParams = {
 };
 
 // Controlador para eliminar una solicitud de evento
-  export const deleteEventRequestSentController = async (req: AuthRequest<DeleteUserParams>, res: Response): Promise<void> => {
-    const userId = req.userId;
+export const deleteEventRequestSentController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req as any).userId;
     const { eventId } = req.params;
 
     if (!userId || !eventId) {

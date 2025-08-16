@@ -34,7 +34,7 @@ export const limitEventRequestsSent = rateLimit({
   windowMs: 60 * 1000,
   max: 10,
   message: { error: "Demasiadas solicitudes. Intenta más tarde." },
-  keyGenerator: (req: AuthRequest) => {
+  keyGenerator: (req: any) => {
     const userId = req.userId;
     if (typeof userId === "string" && userId.length) return userId;
     return normalizeIp(req);

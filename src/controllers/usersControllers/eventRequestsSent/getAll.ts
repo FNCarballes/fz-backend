@@ -1,9 +1,8 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { UserModel } from "../../../models/UserModel";
-import { AuthRequest } from "../../../types/express";
 import {logger} from "../../../utils/logger/logger"
- export const getEventRequestsSentController = async (req: AuthRequest, res: Response): Promise<void> => {
-    const userId = req.userId;
+export const getEventRequestsSentController = async (req: Request, res: Response): Promise<void> => {
+  const userId = (req as any).userId;
     if (!userId) {
       res.status(400).json({ error: "userId es obligatorio" });
       return;

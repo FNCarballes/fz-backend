@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from "express";
 import { EventModel } from "../../models/EventsModel";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import {eventQuerySchema} from "../../models/schemasZod/events/eventQuerySchema";
-import {logger} from "../../utils/logger/logger"
 
 export const getAllEventsController = async (  req: Request,
  res: Response, next: NextFunction) => {

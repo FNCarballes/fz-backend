@@ -9,11 +9,11 @@ type GetRequestQuery = {
 };  
 //trae todas las solicitudes de un evento. Lo usa solo el creador del evento
 export const getEventRequestsController = async (
-  req: AuthRequest<{}, {}, {}, GetRequestQuery>, // tipa el cuarto genérico de AuthRequest, que es para Query.
+  req: AuthRequest<{}, {}, {}, {}>, // tipa el cuarto genérico de AuthRequest, que es para Query.
   res: Response
 ): Promise<void> => {
   const userId = req.userId;
-  const eventId = req.query.eventId;
+  const eventId = (req as any).query.eventId;
 
   if (!userId || !eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
     res

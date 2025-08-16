@@ -1,10 +1,11 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import app from "../../src/index";
+import app from "../../src/app";
 import { UserModel } from "../../src/models/UserModel";
 import { EventModel } from "../../src/models/EventsModel";
 import { EventRequestModel } from "../../src/models/EventRequestModel";
+import { generateTokens } from "../../src/utils/generateTokens";
 
 // Augment Express Request type to include userId
 declare global {
@@ -66,20 +67,18 @@ describe("POST /api/eventRequests", () => {
   });
 
   it("debería crear una solicitud de evento correctamente", async () => {
-    // Simular autenticación: mockear el middleware para este test
-    // Si usás JWT, deberías generar un token válido y enviarlo en el header
-    // Aquí asumimos que el middleware setea req.userId
     const agent = request(app);
-
-    // Mockear el middleware de auth para este test
-    // Si tu app requiere JWT, adaptá este paso
-    app.use((req, res, next) => {
-      req.userId = userId;
-      next();
-    });
-
+    // Generar un token JWT válido para el usuario de prueba
+    const { accessToken } = await generateTokens(
+      userId.toString(),
+      "testuser@example.com",
+      "test-agent",
+      "127.0.0.1",
+      "test-device"
+    );
     const res = await agent
       .post("/api/eventRequests")
+      .set("Authorization", `Bearer ${accessToken}`)
       .send({ eventId: eventId.toString() })
       .set("Accept", "application/json");
 
@@ -95,12 +94,15 @@ describe("POST /api/eventRequests", () => {
   it("debería rechazar solicitudes duplicadas", async () => {
     await EventRequestModel.create({ userId, eventId, status: "pending" });
     const agent = request(app);
-    app.use((req, res, next) => {
-      req.userId = userId;
-      next();
-    });
-    const res = await agent
+    const { accessToken } = await generateTokens(
+      userId.toString(),
+      "testuser@example.com",
+      "test-agent",
+      "127.0.0.1",
+      "test-device"
+    ); const res = await agent
       .post("/api/eventRequests")
+      .set("Authorization", `Bearer ${accessToken}`)
       .send({ eventId: eventId.toString() })
       .set("Accept", "application/json");
     expect(res.status).toBe(409);
@@ -109,15 +111,18 @@ describe("POST /api/eventRequests", () => {
 
   it("debería rechazar eventId inválido", async () => {
     const agent = request(app);
-    app.use((req, res, next) => {
-      req.userId = userId;
-      next();
-    });
-    const res = await agent
+    const { accessToken } = await generateTokens(
+      userId.toString(),
+      "testuser@example.com",
+      "test-agent",
+      "127.0.0.1",
+      "test-device"
+    ); const res = await agent
       .post("/api/eventRequests")
+      .set("Authorization", `Bearer ${accessToken}`)
       .send({ eventId: "invalid-id" })
       .set("Accept", "application/json");
     expect(res.status).toBe(400);
-    expect(res.body.message).toMatch(/eventId inválido/);
+    expect(res.body.issues[0].message).toMatch(/ID de evento inválido|evento inválido/);
   });
 });

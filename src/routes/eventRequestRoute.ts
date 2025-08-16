@@ -16,6 +16,7 @@ import {
   limitPostEventRequest,
   limitPatchEventRequest,
 } from "../auth/middlewares/rateLimiters";
+import { AuthRequest } from "../types/express";
 const router = express.Router();
 // Crear nueva solicitud
 router.post(
@@ -23,24 +24,24 @@ router.post(
   authMiddleware,
   limitPostEventRequest,
   validate(createEventRequestSchema),
-  postEventRequestController
+  (req, res, next) => postEventRequestController(req as AuthRequest, res, next)
 );
-router.get("/", authMiddleware, getEventRequestsController);
+router.get("/", authMiddleware,   (req, res) => getEventRequestsController(req as AuthRequest, res));
 // Ver estado de solicitud
-router.get("/status", authMiddleware, getStatusEventRequestController);
+router.get("/status", authMiddleware, (req, res, next) => getStatusEventRequestController(req as AuthRequest, res, next));
 // Aceptar o rechazar solicitud
 router.patch(
   "/:requestId",
   authMiddleware,
   limitPatchEventRequest,
   validate(updateEventRequestSchema), // ← ¡Acá entra Zod!
-  patchEventRequestController
+  (req, res, next) =>patchEventRequestController(req as AuthRequest, res, next)
 );
 // Eliminar solicitud
 router.delete(
   "/:requestId",
   authMiddleware,
   validateParams(deleteEventRequestSchema),
-  deleteEventRequestController
+  (req, res) =>deleteEventRequestController(req as AuthRequest, res)
 );
 export default router;
