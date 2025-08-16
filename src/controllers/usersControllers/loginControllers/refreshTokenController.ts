@@ -1,12 +1,12 @@
-import { generateTokens } from "../../../utils/generateTokens";
-import { RefreshTokenModel } from "../../../models/RefreshTokenModel";
+import { publicKey } from "../../../utils/keys/keys";  // ajusta ruta según estructura
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
-export const refreshTokenController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+import { generateTokens } from "../../../utils/generateTokens";
+import { RefreshTokenModel } from "../../../models/RefreshTokenModel";
+import {logger} from "../../../utils/logger/logger"
+export const refreshTokenController = async (req: Request, res: Response): Promise<void> => {
   const { refreshToken } = req.body;
+  const userAgent = req.headers["user-agent"] || "unknown";
 
   if (!refreshToken) {
     res.status(400).json({ error: "Falta refreshToken" });
@@ -19,19 +19,32 @@ export const refreshTokenController = async (
     return;
   }
 
-  try {
-    const payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET!);
+  if (new Date() > storedToken.expiresAt) {
+    await storedToken.deleteOne();
+    res.status(403).json({ error: "Token expirado" });
+    return;
+  }
 
-    // Rotación: eliminar el token usado y generar otro
+  if (storedToken.device !== userAgent) {
+    await storedToken.deleteOne();
+    res.status(403).json({ error: "Dispositivo no reconocido" });
+    return;
+  }
+
+  try {
+    const payload = jwt.verify(refreshToken, publicKey, { algorithms: ["RS256"] }) as { id: string; email?: string };
+
     await storedToken.deleteOne();
 
     const { accessToken, refreshToken: newRefreshToken } = await generateTokens(
-      storedToken.userId.toString(),
-      (payload as any).email
+      payload.id,
+      payload.email || "",
+      userAgent
     );
 
     res.json({ accessToken, refreshToken: newRefreshToken });
   } catch (err) {
+    logger.error({err}, "Token error:" );
     res.status(403).json({ error: "Token expirado o inválido" });
   }
 };

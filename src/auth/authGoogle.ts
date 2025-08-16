@@ -1,4 +1,4 @@
-//authGoogle.ts
+/* //authGoogle.ts
 import { OAuth2Client } from "google-auth-library";
 import { Request, Response } from "express";
 import { UserModel } from "../models/UserModel";
@@ -45,4 +45,4 @@ export const loginWithGoogle = async (req: Request, res: Response): Promise<any>
       console.error("Google login error:", error);
       res.status(401).json({ error: "Token de Google inválido" });
     }
-  };
+  }; */

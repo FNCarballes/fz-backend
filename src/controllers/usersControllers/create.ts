@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { UserModel } from "../../models/UserModel";
+import {logger} from "../../utils/logger/logger"
 export const createUserController = async (
   req: Request,
   res: Response
@@ -37,7 +38,7 @@ export const createUserController = async (
     res.status(201).json({ id: savedUser._id });
     return;
   } catch (error) {
-    console.error("❌ Error al crear usuario:", error);
+    logger.error({error}, "❌ Error al crear usuario:");
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };

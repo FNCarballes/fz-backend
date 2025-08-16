@@ -74,7 +74,7 @@ eventSchema.virtual("participants", {
   match:       { status: "accepted" }
 });
 // Virtual populate: solicita todos los EventRequest (sin filtro de status)
-eventSchema.virtual("requests", {
+eventSchema.virtual("requestsForPopulate", {
   ref:         "EventRequest",
   localField:  "_id",
   foreignField:"eventId",

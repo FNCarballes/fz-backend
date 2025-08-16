@@ -2,7 +2,7 @@
 import {  Response } from "express";
 import { AuthRequest } from "../../../types/express";  
 import { UserModel } from "../../../models/UserModel";
-
+import {logger} from "../../../utils/logger/logger"
 type DeleteUserParams = {
   eventId: string;
 };
@@ -31,7 +31,7 @@ type DeleteUserParams = {
 
       res.status(200).json({ message: "Solicitud de evento eliminada" });
     } catch (error) {
-      console.error("❌ Error al eliminar solicitud de evento:", error);
+      logger.error({error},"❌ Error al eliminar solicitud de evento:");
       res.status(500).json({ error: "Error interno del servidor" });
     }
   }

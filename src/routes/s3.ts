@@ -2,7 +2,7 @@ import { Router, RequestHandler } from "express";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { S3Client } from "@aws-sdk/client-s3";
-
+import {logger} from "../utils/logger/logger"
 const s3Client = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
@@ -47,7 +47,7 @@ const handleGetUploadUrl: RequestHandler<
 
     res.json({ url });
   } catch (error) {
-    console.error("Error generating signed URL:", error);
+    logger.error({error},"Error generating signed URL:" );
     res.status(500).json({ error: "Internal server error" });
   }
 };

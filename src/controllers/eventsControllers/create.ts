@@ -6,6 +6,7 @@ import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { CreateEventInput } from "../../models/schemasZod/events/CreateEventSchema";
 import { AuthRequest } from "../../types/express/index";
 import { emitToAll } from "../../sockets/forEventRequest/eventEmmiters";
+import {logger} from "../../utils/logger/logger"
 export const createEventController = async (
   req: AuthRequest,
   res: Response,

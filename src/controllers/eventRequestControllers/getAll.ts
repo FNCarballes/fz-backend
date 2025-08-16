@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { EventRequestModel } from "../../models/EventRequestModel";
 import { Response } from "express";
 import { EventModel } from "../../models/EventsModel";
+import {logger} from "../../utils/logger/logger"
 type GetRequestQuery = {
   eventId: string;
 };  
@@ -39,7 +40,7 @@ export const getEventRequestsController = async (
       .populate("userId", "name surname email");
     res.json(requests);
   } catch (error) {
-    console.error("❌ Error al obtener solicitudes de evento:", error);
+    logger.error({error}, "❌ Error al obtener solicitudes de evento:");
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };

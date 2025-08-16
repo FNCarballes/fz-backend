@@ -3,7 +3,6 @@ import express, { Request, Response, NextFunction } from "express";
 import { EventRequestModel } from "../../models/EventRequestModel";
 import { EventModel } from "../../models/EventsModel";
 import {
-  CreateEventRequestInput,
   UpdateEventRequestInput,
 } from "../../models/schemasZod/eventsRequest/EventRequestSchema";
 import {

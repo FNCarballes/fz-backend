@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
 import { EventModel } from "../../models/EventsModel";
 import { AuthRequest } from "../../types/express";
-
+import {logger} from "../../utils/logger/logger"
 type DeleteEventParams = { id: string };
 
 export const deleteEventController =   async (req: AuthRequest<DeleteEventParams>, res: Response, next: NextFunction): Promise<any> => {

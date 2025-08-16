@@ -1,5 +1,7 @@
 import { Server } from "socket.io";
 import mongoose from "mongoose";
+import {logger} from "../../utils/logger/logger"
+import {EventModel} from "../../models/EventsModel"; // o como tengas organizado
 
 export const emitToCreator = async (
   io: Server,
@@ -7,12 +9,12 @@ export const emitToCreator = async (
   type: "request:created" | "request:updated" | "request:deleted",
   payload: any
 ) => {
-  const event = await mongoose.model("Event").findById(eventId).populate("creator");
+  const event = await EventModel.findById(eventId).populate("creator");
   if (!event || !event.creator) return;
 
   const creatorId = event.creator._id.toString();
   io.to(creatorId).emit(type, payload);
-  console.log(`📢 ${type} emitido a ${creatorId}`);
+  logger.info(`📢 ${type} emitido a ${creatorId}`);
 };
 
 export const emitToUser = (
@@ -22,7 +24,7 @@ export const emitToUser = (
   payload: any
 ) => {
   io.to(userId).emit(type, payload);
-  console.log(`🔔 ${type} emitido a ${userId}`);
+  logger.info(`🔔 ${type} emitido a ${userId}`);
 };
 
 export const emitToAll = (
@@ -31,5 +33,5 @@ export const emitToAll = (
   payload: any
 ) => {
   io.emit(type, payload);
-  console.log(`🌍 ${type} emitido a TODOS`);
+  logger.info(`🌍 ${type} emitido a TODOS`);
 };

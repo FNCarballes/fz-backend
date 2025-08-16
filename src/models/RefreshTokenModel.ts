@@ -7,6 +7,8 @@ export interface IRefreshToken extends Document {
   userAgent: string;
   ip: string;
   createdAt: Date;
+    device: string;
+
 }
 const refreshTokenSchema = new Schema<IRefreshToken>({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
@@ -15,6 +17,8 @@ const refreshTokenSchema = new Schema<IRefreshToken>({
   userAgent: { type: String, required: true },
   ip: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
+  device: { type: String, required: true }, // ⬅️ obligatorio para evitar inconsistencias
+
 });
 export const RefreshTokenModel = mongoose.model<IRefreshToken>(
   "RefreshToken",

@@ -4,7 +4,7 @@ import { AuthRequest } from "../../types/express";
 import { CreateEventRequestInput } from "../../models/schemasZod/eventsRequest/EventRequestSchema";
 import mongoose from "mongoose";
 import { Response, NextFunction } from "express";
-
+import {logger} from "../../utils/logger/logger"
 export const postEventRequestController = async (
   req: AuthRequest,
   res: Response,
@@ -49,7 +49,7 @@ export const postEventRequestController = async (
         requestId: requestSaved._id,
         userId,
       });
-      console.log(`📢 request:created emitido a ${creatorId}`);
+      logger.info(`📢 request:created emitido a ${creatorId}`);
     }
 
     res.status(201).json({ id: requestSaved._id });

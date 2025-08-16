@@ -5,6 +5,7 @@ import { Response } from "express";
 import { AuthRequest } from "../../types/express";
 import { emitToCreator } from "../../sockets/forEventRequest/eventEmmiters";
 import mongoose from "mongoose";
+import {logger} from "../../utils/logger/logger"
 type DeleteParams = {
   requestId: string;
 };
@@ -58,7 +59,7 @@ export const deleteEventRequestController = async (
 
     res.status(204).send(); // ✅ Todo ok, sin contenido
   } catch (error) {
-    console.error("❌ Error al eliminar solicitud:", error);
+    logger.error({error}, "❌ Error al eliminar solicitud:");
     res.status(500).json({ error: "Error interno del servidor." });
   }
 };

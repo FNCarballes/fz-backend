@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { UserModel } from "../../../models/UserModel";
 import { AuthRequest } from "../../../types/express";
-  
+import {logger} from "../../../utils/logger/logger"
  export const getEventRequestsSentController = async (req: AuthRequest, res: Response): Promise<void> => {
     const userId = req.userId;
     if (!userId) {
@@ -23,7 +23,7 @@ import { AuthRequest } from "../../../types/express";
       res.status(200).json({ eventRequestsSent: user.eventRequestsSent });
       return
     } catch (error) {
-      console.error("❌ Error al obtener solicitudes de evento:", error);
+      logger.error({error},"❌ Error al obtener solicitudes de evento:");
       res.status(500).json({ error: "Error interno del servidor" });
     }
   }

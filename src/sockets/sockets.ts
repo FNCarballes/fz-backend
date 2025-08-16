@@ -1,17 +1,18 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
+import {logger} from "../utils/logger/logger"
 
 export function setupSocketIO(io: SocketIOServer) {
   io.on("connection", (socket: Socket) => {
-    console.log("🔌 Socket conectado:", socket.id);
+    logger.info({socketId: socket.id}, "🔌 Socket conectado:");
 
     socket.on("join", (userId: string) => {
       if (!userId) return;
       socket.join(userId);
-      console.log(`✅ Socket ${socket.id} unido a room de usuario ${userId}`);
+     logger.info({ socketId: socket.id, userId }, "✅ Socket unido a room de usuario");
     });
 
     socket.on("disconnect", () => {
-      console.log("⛔ Socket desconectado:", socket.id);
+      logger.info({socketId: socket.id},"⛔ Socket desconectado:");
     });
   });
 }

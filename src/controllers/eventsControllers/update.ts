@@ -4,7 +4,7 @@ import { EventModel } from "../../models/EventsModel";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { AuthRequest } from "../../types/express/index";
 import {updateEventSchema} from "../../models/schemasZod/events/UpdateEventSchema";
-
+import {logger} from "../../utils/logger/logger"
 export const updateEventController =  async (  req: AuthRequest<{ id: string }>,
  res: Response, next: NextFunction): Promise<void> => {
     try {

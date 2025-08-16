@@ -13,6 +13,6 @@ export interface IUser extends Document {
   _id: any;
   photos?: string[]; // Array de strings para las fotos
   eventRequestsSent: mongoose.Types.ObjectId[]; // o incluso: (IEvent | mongoose.Types.ObjectId)[]
-
+  userAgent?: string; // opcional, si no se usa en tu aplicación
   // otros campos opcionales
 }

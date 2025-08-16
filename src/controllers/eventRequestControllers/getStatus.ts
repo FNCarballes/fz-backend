@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express";
 import { EventRequestModel } from "../../models/EventRequestModel";
 import { AuthRequest } from "../../types/express/index";
 import mongoose from "mongoose";
+import {logger} from "../../utils/logger/logger"
 interface GetStatusQuery {
   eventId?: string;
 }

@@ -1,7 +1,8 @@
 // auth/authMiddleware.ts
 import { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { AuthRequest } from "../types/express";
+import { publicKey } from "../../utils/keys/keys";
+import { AuthRequest } from "../../types/express";
 export function authMiddleware(
   req: AuthRequest,
   res: Response,
@@ -17,11 +18,10 @@ export function authMiddleware(
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-
+    const decoded = jwt.verify(token, publicKey, { algorithms: ["RS256"] });
     if (typeof decoded === "object" && "id" in decoded) {
       req.userId = decoded.id;
-      next(); // ✅ sigue el flujo si está todo bien
+      next();
     } else {
       res.status(401).json({ error: "Token inválido" });
     }

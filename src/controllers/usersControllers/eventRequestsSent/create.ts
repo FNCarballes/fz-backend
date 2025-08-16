@@ -2,7 +2,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { UserModel } from "../../../models/UserModel";
-
+import {logger} from "../../../utils/logger/logger"
 
 export const postEventRequestController = async (req: Request, res: Response): Promise<void> => {
   const userId = (req as any).userId;
@@ -38,7 +38,7 @@ export const postEventRequestController = async (req: Request, res: Response): P
     res.status(200).json({ message: "Solicitud de evento agregada" });
     return;
   } catch (error) {
-    console.error("❌ Error al agregar solicitud de evento:", error);
+    logger.error({error}, "❌ Error al agregar solicitud de evento:");
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
