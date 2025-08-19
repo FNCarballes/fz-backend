@@ -2,17 +2,21 @@
 import { Request, Response, NextFunction } from "express";
 import { EventModel } from "../../models/EventsModel";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
-import {eventQuerySchema} from "../../models/schemasZod/events/eventQuerySchema";
+import { eventQuerySchema } from "../../models/schemasZod/events/eventQuerySchema";
 
-export const getAllEventsController = async (  req: Request,
- res: Response, next: NextFunction) => {
+interface RequestWithQuery extends Request {
+  validatedQuery?: any;
+}
+
+export const getAllEventsController = async (req: RequestWithQuery,
+  res: Response, next: NextFunction) => {
   try {
-        const query = eventQuerySchema.parse(req.query); // ⚠️ casteamos aquí con seguridad
+    const query = eventQuerySchema.parse(req.validatedQuery); // ⚠️ casteamos aquí con seguridad
 
-        const { page, limit, isSolidary } = query;
+const { page, limit, isSolidary } = query;
 
     // 1) Filtrado booleano
-     const mongoQuery: any = {};
+    const mongoQuery: any = {};
     if (typeof isSolidary === "boolean") {
       mongoQuery.isSolidary = isSolidary;
     }
@@ -21,10 +25,10 @@ export const getAllEventsController = async (  req: Request,
     const skip = (page - 1) * limit;
 
     // 3) Conteo total
-    const total = await EventModel.countDocuments(query);
+    const total = await EventModel.countDocuments(mongoQuery);
 
     // 4) Consulta con skip/limit
-    const events = await EventModel.find(query)
+    const events = await EventModel.find(mongoQuery)
       .sort({ creationDate: -1 })
       .skip(skip)
       .limit(limit)
@@ -39,7 +43,7 @@ export const getAllEventsController = async (  req: Request,
         },
       })
       .populate({
-        path: "requests",
+        path: "requestsForPopulate",
         select: "userId status _id",
         populate: {
           path: "userId",

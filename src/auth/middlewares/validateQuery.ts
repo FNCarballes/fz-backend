@@ -1,19 +1,21 @@
 import type { Request, Response, NextFunction } from "express";
 import type { ZodType } from "zod";
 
-export const validateQuery =
-  (schema: ZodType<any>) =>
-  (req: Request, res: Response, next: NextFunction): void => {
+export function validateQuery(schema: ZodType<any, any, any>) {
+  return (req: Request & { validatedQuery?: any }, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.query);
+
     if (!result.success) {
-      res.status(400).json({
-        errors: result.error.issues.map((e) => ({
-          path: e.path,
-          message: e.message,
-        })),
-      });
+      const issues = result.error.issues.map((e) => ({
+        path: e.path.join("."),
+        message: e.message,
+        code: e.code,
+      }));
+      res.status(400).json({ issues });
       return;
     }
-    req.query = result.data;
+
+    req.validatedQuery = result.data; // ✅ guardamos aparte
     next();
   };
+}

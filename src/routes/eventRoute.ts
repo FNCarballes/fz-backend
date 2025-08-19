@@ -12,11 +12,13 @@ import { deleteEventController } from "../controllers/eventsControllers/delete";
 import { getAllEventsController } from "../controllers/eventsControllers/getAll";
 import { validateQuery } from "../auth/middlewares/validateQuery";
 import { eventQuerySchema } from "../models/schemasZod/events/eventQuerySchema";
+import { limitPostEventRequest, limitPatchEventRequest } from "../auth/middlewares/rateLimiters";
 const router = Router();
 
 router.post(
   "/",
   authMiddleware,
+  limitPostEventRequest,
   validate(createEventSchema),
   createEventController,
 );
@@ -30,6 +32,7 @@ router.get(
 router.patch(
   "/:id",
   authMiddleware,
+  limitPatchEventRequest,
   validate(updateEventSchema),
  updateEventController
 );

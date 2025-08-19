@@ -1,3 +1,19 @@
+// tests/routes/eventRequestRoute.test.ts
+jest.mock("../../src/sockets/forEventRequest/eventEmmiters", () => ({ emitToAll: jest.fn() }));
+const mockAuth = jest.fn();
+jest.mock("../../src/auth/middlewares/authMiddleware", () => ({
+  authMiddleware: (req: any, res: any, next: any) => mockAuth(req, res, next),
+}));
+jest.mock("../../src/auth/middlewares/rateLimiters", () => ({
+  limitPostEventRequest: (_req: any, _res: any, next: any) => next(),
+  limitPatchEventRequest: (_req: any, _res: any, next: any) => next(),
+  limitCreateUser: (_req: any, _res: any, next: any) => next(),
+  limitEventRequestsSent: (_req: any, _res: any, next: any) => next(),
+  loginRateLimiter: (_req: any, _res: any, next: any) => next(),
+}));
+
+
+
 import request from "supertest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -11,7 +27,7 @@ import { generateTokens } from "../../src/utils/generateTokens";
 declare global {
   namespace Express {
     interface Request {
-      userId?: mongoose.Types.ObjectId;
+      userId?: string;
     }
   }
 }
@@ -20,15 +36,25 @@ describe("POST /api/eventRequests", () => {
   let mongoServer: MongoMemoryServer;
   let userId: mongoose.Types.ObjectId;
   let eventId: mongoose.Types.ObjectId;
+  let otherUserId: mongoose.Types.ObjectId;
+  let accessToken: string;
 
   beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
     await mongoose.disconnect();
     await mongoose.connect(uri);
+     // mock de socket.io
+  const fakeIo = { to: jest.fn().mockReturnThis(), emit: jest.fn() };
+  app.set("io", fakeIo);
   });
 
   beforeEach(async () => {
+         jest.clearAllMocks();
+  mockAuth.mockImplementation((req, _res, next) => {
+    req.userId = userId.toString();
+    next();
+  });
     await UserModel.deleteMany({});
     await EventModel.deleteMany({});
     await EventRequestModel.deleteMany({});
@@ -46,6 +72,29 @@ describe("POST /api/eventRequests", () => {
       eventRequestsSent: [],
     });
     userId = user._id;
+
+
+       const otherUser = await UserModel.create({
+          googleId: "other-google-id",
+          name: "Other",
+          surname: "User",
+          identify: "654321",
+          age: 28,
+          email: "other@example.com",
+          password: "hashedpassword",
+          photos: [],
+          eventRequestsSent: [],
+        });
+        otherUserId = otherUser._id;
+    
+        const tokens = await generateTokens(
+          userId.toString(),
+          "testuser@example.com",
+          "test-agent",
+          "127.0.0.1",
+          "test-device"
+        );
+        accessToken = tokens.accessToken;
 
     // Crear evento de prueba
     const event = await EventModel.create({
@@ -66,19 +115,15 @@ describe("POST /api/eventRequests", () => {
     await mongoServer.stop();
   });
 
+
+  
+
   it("debería crear una solicitud de evento correctamente", async () => {
     const agent = request(app);
     // Generar un token JWT válido para el usuario de prueba
-    const { accessToken } = await generateTokens(
-      userId.toString(),
-      "testuser@example.com",
-      "test-agent",
-      "127.0.0.1",
-      "test-device"
-    );
+
     const res = await agent
-      .post("/api/eventRequests")
-      .set("Authorization", `Bearer ${accessToken}`)
+      .post("/api/eventRequests").set("Authorization", `Bearer ${accessToken}`)
       .send({ eventId: eventId.toString() })
       .set("Accept", "application/json");
 

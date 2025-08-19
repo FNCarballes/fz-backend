@@ -3,7 +3,7 @@ import { z } from "zod";
 import mongoose from "mongoose";
 
 export const deleteRequestSentSchema = z.object({
-  eventId: z
+  requestId: z
     .string()
     .refine((id) => mongoose.Types.ObjectId.isValid(id), {
       message: "eventId inválido",

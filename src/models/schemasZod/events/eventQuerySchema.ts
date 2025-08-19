@@ -1,4 +1,4 @@
-// eventQuerySchema.ts
+// src/models/schemasZod/events/eventQuerySchema.ts
 import { z } from "zod";
 
 export const eventQuerySchema = z.object({

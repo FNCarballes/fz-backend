@@ -6,7 +6,7 @@ import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { CreateEventInput } from "../../models/schemasZod/events/CreateEventSchema";
 import { AuthRequest } from "../../types/express/index";
 import { emitToAll } from "../../sockets/forEventRequest/eventEmmiters";
-import {logger} from "../../utils/logger/logger"
+import { logger } from "../../utils/logger/logger"
 export const createEventController = async (
   req: Request,
   res: Response,
@@ -24,7 +24,9 @@ export const createEventController = async (
       location,
       isSolidary,
     } = input;
-  const userId = (req as any).userId;
+    const userId = (req as any).userId;
+    if (!userId) return res.status(401).json({ error: "No autenticado" });
+
     const newEvent = new EventModel({
       titleEvent,
       publicDescription,
@@ -37,8 +39,8 @@ export const createEventController = async (
       isSolidary: isSolidary || false, // Campo opcional para eventos solidarios
     });
     const saved = await newEvent.save();
-    const io = req.app.get("io") as SocketIOServer;
-    emitToAll("event:created", cleanEventDoc(saved));
+      const io = req.app.get("io") as SocketIOServer | undefined;
+    if (io) io.emit("event:created", cleanEventDoc(saved)); // no llames a un singleton no inicializado
 
     res.status(201).json({ id: saved._id });
   } catch (err) {

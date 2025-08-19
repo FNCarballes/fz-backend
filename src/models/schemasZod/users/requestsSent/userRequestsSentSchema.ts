@@ -5,9 +5,7 @@ import { z } from "zod";
 const objectIdRegex = /^[a-f\d]{24}$/i;
 
 export const userRequestSentSchema = z.object({
-  body: z.object({
     requestId: z
       .string()
       .regex(objectIdRegex, { message: "requestId debe ser un ObjectId válido" }),
-  }),
 });

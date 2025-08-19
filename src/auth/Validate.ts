@@ -44,3 +44,21 @@ export function validateParams(schema: ZodType<any, any, any>) {
   };
 }
 
+export function validateQuery(schema: ZodType<any, any, any>) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const result = schema.safeParse(req.query);
+
+    if (!result.success) {
+      const issues = result.error.issues.map((e) => ({
+        path: e.path.join("."),
+        message: e.message,
+        code: e.code,
+      }));
+      res.status(400).json({ issues });
+      return;
+    }
+
+    req.query = result.data;
+    next();
+  };
+}

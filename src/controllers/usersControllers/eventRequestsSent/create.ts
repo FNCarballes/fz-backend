@@ -26,14 +26,17 @@ export const postEventRequestController = async (req: Request, res: Response): P
       return;
     }
 
-    // Evitar duplicados
-    //Este método de JavaScript verifica si al menos un elemento del
-    // arreglo cumple una condición.
-    //Retorna true si encuentra uno que la cumpla.
-    if (!user.eventRequestsSent.some((id) => id.toString() === requestId)) {
-      user.eventRequestsSent.push(requestId);
-      await user.save();
+
+    // 🚫 Si ya existe, devolver 409
+    if (user.eventRequestsSent.some((id) => id.toString() === requestId)) {
+      res.status(409).json({ error: "El request ya fue agregado previamente" });
+      return;
     }
+
+    // ✅ Si no existe, agregarlo
+    user.eventRequestsSent.push(requestId);
+    await user.save();
+    
 
     res.status(200).json({ message: "Solicitud de evento agregada" });
     return;

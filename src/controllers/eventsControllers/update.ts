@@ -17,7 +17,7 @@ export const updateEventController =  async (  req: Request<{ id: string }>,
         return;
       }
 
-      if (event.creator.toString() !== userId) {
+      if (event.creator.toString() !== userId.toString()) {
         res.status(403).json({ error: "No autorizado" });
         return;
       }
