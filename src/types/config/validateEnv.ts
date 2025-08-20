@@ -47,5 +47,6 @@ export function validateEnv() {
       default: false,
       desc: 'Habilita o deshabilita notificaciones por email'
     }),
+    SENTRY_DSN: str(),
   })
 }

@@ -1,12 +1,14 @@
-// ~/index.ts
+// ~/src/index.ts
+
 import http from "http";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { setupSocketIO } from "./sockets/setUpSockets";
 import { logger } from "./utils/logger/logger";
-import { validateEnv } from "./types/config/env";
+import { validateEnv } from "./types/config/validateEnv";
 import app from "./app";
 import { initSocket } from "./sockets/socket";
+
 
 dotenv.config();
 const env = validateEnv();
@@ -40,4 +42,9 @@ mongoose
 
 // Graceful shutdown
 process.on("SIGINT", () => server.close(() => mongoose.disconnect()));
-process.on("SIGTERM", () => server.close(() => mongoose.disconnect()));
+process.on("SIGTERM", async () => {
+  logger.info("Cerrando servidor...");
+  io.close();
+  await mongoose.disconnect();
+  server.close(() => process.exit(0));
+});
