@@ -8,6 +8,7 @@ import { logger } from "./utils/logger/logger";
 import { validateEnv } from "./types/config/validateEnv";
 import app from "./app";
 import { initSocket } from "./sockets/socket";
+import { gracefulShutdown } from "./utils/server/gracefulShutdown";
 
 
 dotenv.config();
@@ -40,11 +41,8 @@ mongoose
     process.exit(1);
   });
 
-// Graceful shutdown
-process.on("SIGINT", () => server.close(() => mongoose.disconnect()));
-process.on("SIGTERM", async () => {
-  logger.info("Cerrando servidor...");
-  io.close();
-  await mongoose.disconnect();
-  server.close(() => process.exit(0));
-});
+
+// Graceful shutdown centralizado
+const shutdownHandler = gracefulShutdown(server, io);
+process.on("SIGINT", () => shutdownHandler("SIGINT"));
+process.on("SIGTERM", () => shutdownHandler("SIGTERM"));

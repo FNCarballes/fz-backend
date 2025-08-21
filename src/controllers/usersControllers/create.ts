@@ -9,8 +9,9 @@ export const createUserController = async (
   res: Response
 ): Promise<void> => {
   try {
+    console.log(req.body,  "📩 Body recibido en createUserController")
     const { name, surname, identify, age, email, password, photos } = req.body;
-
+        console.log({ name, surname, identify, age, email, photos }, "✅ Campos parseados");
     const normalizedEmail = email.trim().toLowerCase();
 
     // Verificar si el email ya existe
@@ -41,6 +42,7 @@ export const createUserController = async (
     return;
   } catch (error) {
     logger.error({error}, "❌ Error al crear usuario:");
+    console.log(error, "❌ Error al crear usuario:")
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };

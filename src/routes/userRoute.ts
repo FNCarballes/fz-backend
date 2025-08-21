@@ -12,7 +12,7 @@ import { deleteEventRequestSentController } from "../controllers/usersController
 import { deleteRequestSentSchema } from "../models/schemasZod/users/requestsSent/deleteRequestSentSchema";
 import { limitCreateUser, limitEventRequestsSent } from "../auth/middlewares/rateLimiters";
 const router = express.Router();
-router.post("/", limitCreateUser, validate(createUserSchema), createUserController);
+router.post("/", limitCreateUser,  validate(createUserSchema), createUserController);
 router.post("/eventRequestsSent", authMiddleware, limitEventRequestsSent, validate(userRequestSentSchema), postEventRequestController);
 router.get("/eventRequestsSent", authMiddleware, getEventRequestsSentController);
 router.delete(

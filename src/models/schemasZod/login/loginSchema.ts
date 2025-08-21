@@ -1,7 +1,5 @@
 import {z} from "zod"
 export const loginSchema = z.object({
-  body: z.object({
     email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Email inválido"),
     password: z.string().min(6, "Contraseña inválida"),
-  }),
 });

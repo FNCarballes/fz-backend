@@ -18,7 +18,7 @@ import {logger} from "../../../utils/logger/logger"
 export const login = async (req: Request, res: Response): Promise<void> => {
   // Se extraen los campos email y password que el usuario envía desde el frontend.
   const { email, password } = req.body;
-
+console.log(req.body, "📩 Body recibido en login")
   // Se valida que ambos campos estén presentes.
   try {
     const user = (await User.findOne({ email })) as IUser | null;

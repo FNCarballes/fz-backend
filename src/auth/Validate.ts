@@ -6,7 +6,7 @@ import { ZodType } from "zod";
 export function validate(schema: ZodType<any, any, any>) {
   return (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req.body);
-
+      console.log("📩 Validando body:", req.body);   // 👈 LOG
     if (!result.success) {
       const issues = result.error.issues.map((issue) => ({
         path: issue.path.join("."),
