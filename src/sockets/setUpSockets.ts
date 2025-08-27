@@ -1,23 +1,30 @@
-// src/socket/setupSocket.ts
-import { Socket } from "socket.io";
+// src/sockets/setupSocket.ts
+import type { Server, Socket } from "socket.io";
 import { logger } from "../utils/logger/logger";
-import {initSocket} from "./socket"
 import { activeSockets } from "../utils/monitoring/prometheus";
 
-export function setupSocketIO(io: ReturnType<typeof initSocket>) {
+export function setupSocketIO(io: Server) {
   io.on("connection", (socket: Socket) => {
-    logger.info({ socketId: socket.id }, "🔌 Socket conectado:");
-activeSockets.inc();
-    socket.on("join", (userId: string) => {
-      if (!userId) return;
-      socket.join(userId);
-      logger.info({ socketId: socket.id, userId }, "✅ Socket unido a room de usuario");
+    activeSockets.inc();
+    const userId = socket.data.userId as string | undefined;
+
+    if (!userId) {
+      logger.warn({ socketId: socket.id }, "⚠️ Conexión sin userId; desconectando");
+      socket.disconnect(true);
+      return;
+    }
+
+    socket.join(userId);
+    logger.info({ socketId: socket.id, userId }, "✅ Socket unido automáticamente al room del usuario");
+
+    // (Opcional) listeners de debug/errores
+    socket.on("error", (err) => {
+      logger.error({ socketId: socket.id, err }, "Socket error");
     });
 
-    socket.on("disconnect", () => {
-      logger.info({ socketId: socket.id }, "⛔ Socket desconectado:");
-       () => activeSockets.dec()
+    socket.on("disconnect", (reason) => {
+      activeSockets.dec();
+      logger.info({ socketId: socket.id, reason }, "⛔ Socket desconectado");
     });
   });
 }
-

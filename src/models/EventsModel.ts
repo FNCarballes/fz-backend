@@ -1,26 +1,26 @@
-// models/Event.ts
-import mongoose, { Document, Types } from "mongoose";
+  // models/Event.ts
+  import mongoose, { Document, Types } from "mongoose";
 
-// 1️⃣ Define una interfaz TypeScript
-export interface IEvent extends Document {
-  _id: Types.ObjectId; // ✅ Mongoose crea un _id automáticamente
-  titleEvent: string;
-  publicDescription: string;
-  privateDescription: string;
-  date: string;
-  image?: string;
-  location: string;
-  creationDate: Date;
-  creator: Types.ObjectId | {
-    _id: Types.ObjectId;
-    name: string;
-    surname: string;
-    email: string;
-    age: number;
+  // 1️⃣ Define una interfaz TypeScript
+  export interface IEvent extends Document {
+    _id: Types.ObjectId; // ✅ Mongoose crea un _id automáticamente
+    titleEvent: string;
+    publicDescription: string;
+    privateDescription: string;
+    date: Date;
+    image?: string;
     location: string;
-    identify: string;
-  };
-  isSolidary: boolean;
+    creationDate: Date;
+    creator: Types.ObjectId | {
+      _id: Types.ObjectId;
+      name: string;
+      surname: string;
+      email: string;
+      age: number;
+      location: string;
+      identify: string;
+    };
+    isSolidary: boolean;
 
   // Virtual populate para participantes aceptados
   participants: Array<{
@@ -53,7 +53,7 @@ const eventSchema = new mongoose.Schema({
   titleEvent:         { type: String, required: true },
   publicDescription:  { type: String, required: true },
   privateDescription: { type: String, required: true },
-  date:               { type: String, required: true },
+  date:               { type: Date, required: true },
   image:              { type: String },
   location:           { type: String, required: true },
   creationDate:       { type: Date, default: Date.now },

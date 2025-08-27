@@ -43,20 +43,20 @@ console.log(req.body, "📩 Body recibido en login")
 );
 
       const userId = user._id.toString(); // Convierte el ObjectId a string
-      const userName = user.name; // Convierte el ObjectId a string
-      const userSurname = user.surname; // Convierte el ObjectId a string
-      const userIdentify = user.identify; // Convierte el ObjectId a string
-      const userAge = user.age; // Convierte el ObjectId a string
-      const userPhotos = user.photos; // Convierte el ObjectId a string
+      const name = user.name; // Convierte el ObjectId a string
+      const surname = user.surname; // Convierte el ObjectId a string
+      const identify = user.identify; // Convierte el ObjectId a string
+      const age = user.age; // Convierte el ObjectId a string
+      const photos = user.photos; // Convierte el ObjectId a string
       res.json({
         accessToken,
         refreshToken,
         userId,
-        userName,
-        userSurname,
-        userIdentify,
-        userAge,
-        userPhotos,
+        name,
+        surname,
+        identify,
+        age,
+        photos,
       });
     } else {
       res.status(401).json({ message: "Usuario o contraseña incorrectos" });

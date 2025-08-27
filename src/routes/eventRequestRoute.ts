@@ -34,7 +34,7 @@ router.patch(
   "/:requestId",
   authMiddleware,
   limitPatchEventRequest,
-  validate(updateEventRequestSchema), // ← ¡Acá entra Zod!
+  validate(updateEventRequestSchema), 
   (req, res, next) =>patchEventRequestController(req as AuthRequest, res, next)
 );
 // Eliminar solicitud
