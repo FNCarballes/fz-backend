@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { UserModel } from "../../models/UserModel";
-import {logger} from "../../utils/logger/logger"
+import { logger } from "../../utils/logger/logger"
 import { usersCreated } from "../../utils/monitoring/prometheus";
 
 export const createUserController = async (
@@ -9,16 +9,15 @@ export const createUserController = async (
   res: Response
 ): Promise<void> => {
   try {
-    console.log(req.body,  "📩 Body recibido en createUserController")
+    console.log(req.body, "📩 Body recibido en createUserController")
     const { name, surname, identify, age, email, password, photos } = req.body;
-        console.log({ name, surname, identify, age, email, photos }, "✅ Campos parseados");
+    console.log({ name, surname, identify, age, email, photos }, "✅ Campos parseados");
     const normalizedEmail = email.trim().toLowerCase();
 
     // Verificar si el email ya existe
     const existingUser = await UserModel.findOne({ email: normalizedEmail });
     if (existingUser) {
-      res.status(409).json({ error: "No se puede crear el usuario" }); // 409 Conflict
-      return;
+      res.status(409).json({ error: "El correo ya está registrado" }); return;
     }
 
     // Encriptar la contraseña
@@ -41,7 +40,7 @@ export const createUserController = async (
     res.status(201).json({ id: savedUser._id });
     return;
   } catch (error) {
-    logger.error({error}, "❌ Error al crear usuario:");
+    logger.error({ error }, "❌ Error al crear usuario:");
     console.log(error, "❌ Error al crear usuario:")
     res.status(500).json({ error: "Error interno del servidor" });
   }

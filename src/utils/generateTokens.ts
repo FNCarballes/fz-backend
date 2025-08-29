@@ -1,42 +1,30 @@
 // src/auth/utils/generateTokens.ts
 import jwt from "jsonwebtoken";
-import { RefreshTokenModel } from "../models/RefreshTokenModel";
 import fs from "fs";
 import path from "path";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const privateKey = fs.readFileSync(
   path.join(__dirname, "../../keys/private.key"),
   "utf-8"
 );
 
-export const generateTokens = async (
-  userId: string,
-  email: string,
-  userAgent: string,
-  ip: string,
-  device: string = "unknown"
-) => {
-  const accessToken = jwt.sign({ id: userId, email }, privateKey, {
-    algorithm: "RS256",
-    expiresIn: "1h",
-  });
+export const generateTokens = async (userId: string, email: string) => {
 
-  const refreshToken = jwt.sign({ id: userId, email }, privateKey, {
-    algorithm: "RS256",
-    expiresIn: "7d",
-  });
 
-  // Guardar el refresh token en la DB
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7);
-
-  await RefreshTokenModel.create({
-    token: refreshToken,
-    userId,
-    expiresAt,
-    userAgent: userAgent || "unknown",
-    ip: ip || "unknown",
-    device: device || userAgent || "unknown",
-  });
-  return { accessToken, refreshToken };
+  // Access token
+  const accessToken = jwt.sign(
+    { userId, email }, // payload
+    privateKey,
+    {
+      algorithm: "RS256",
+      expiresIn: "1h",
+      subject: userId, // `sub` en JWT
+    }
+  );
+  const jti = crypto.randomUUID();
+  // Refresh token
+  const refreshToken = jwt.sign({ userId, email, jti }, privateKey, { algorithm: "RS256", expiresIn: "30d", subject: userId });
+  return { accessToken, refreshToken, jti };
 };

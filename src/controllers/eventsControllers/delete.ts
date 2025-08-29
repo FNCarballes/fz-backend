@@ -16,7 +16,7 @@ export const deleteEventController = async (req: Request<DeleteEventParams>, res
       return res.status(404).json({ error: "Evento no encontrado" });
     }
 
-    if (event.creator.toString() !== userId) {
+    if (event.creator.toString() !== userId.toString()) {
       return res.status(403).json({ error: "No autorizado" });
     }
 
@@ -25,7 +25,7 @@ export const deleteEventController = async (req: Request<DeleteEventParams>, res
     const io = req.app.get("io") as SocketIOServer;
     io.emit("event:deleted", { id });
 
-    res.json({ message: "Evento eliminado correctamente" });
+    res.json({ id });
   } catch (err) {
     next(err);
   }

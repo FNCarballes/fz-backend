@@ -14,32 +14,30 @@ import { IUser } from "../../../types/userTypes"; // Asumiendo que defines esta 
 import { generateTokens } from "../../../utils/generateTokens"; // Importa la función para generar tokens
 //Recibe una petición (req) y una respuesta (res) y no devuelve nada (Promise<void>).
 //Es usada como controlador cuando un usuario intenta iniciar sesión.
-import {logger} from "../../../utils/logger/logger"
+import { logger } from "../../../utils/logger/logger"
 export const login = async (req: Request, res: Response): Promise<void> => {
   // Se extraen los campos email y password que el usuario envía desde el frontend.
   const { email, password } = req.body;
-console.log(req.body, "📩 Body recibido en login")
+  console.log(req.body, "📩 Body recibido en login")
   // Se valida que ambos campos estén presentes.
   try {
-    const user = (await User.findOne({ email })) as IUser | null;
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-      res.status(401).json({ message: "Usuario no encontrado" });
+      res.status(401).json({ "message": "Usuario o contraseña inválidos" });
       return;
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      res.status(401).json({ message: "Credenciales inválidas" });
+      res.status(401).json({ "message": "Usuario o contraseña inválidos" });
       return;
     }
 
     if (user && validPassword) {
-   const { accessToken, refreshToken } = await generateTokens(
+  const { accessToken, refreshToken } = await generateTokens(
   user._id.toString(),
-  user.email,
-  req.headers['user-agent'] || "unknown",
-  req.ip || "unknown",
-  "login-device" // Puedes ajustar el nombre del dispositivo si lo tienes
+  user.email
 );
 
       const userId = user._id.toString(); // Convierte el ObjectId a string
@@ -48,21 +46,22 @@ console.log(req.body, "📩 Body recibido en login")
       const identify = user.identify; // Convierte el ObjectId a string
       const age = user.age; // Convierte el ObjectId a string
       const photos = user.photos; // Convierte el ObjectId a string
-      res.json({
-        accessToken,
-        refreshToken,
-        userId,
-        name,
-        surname,
-        identify,
-        age,
-        photos,
-      });
+
+res.json({
+  accessToken,
+  refreshToken,
+  userId,
+  name,
+  surname,
+  identify,
+  age,
+  photos,
+});
     } else {
       res.status(401).json({ message: "Usuario o contraseña incorrectos" });
     }
   } catch (error) {
-    logger.error({error}, "Login error:" ); // Registra el error completo en el servidor
+    logger.error({ error }, "Login error:"); // Registra el error completo en el servidor
     res.status(500).json({ message: "Error del servidor" }); // Envía un mensaje genérico al cliente
   }
 };

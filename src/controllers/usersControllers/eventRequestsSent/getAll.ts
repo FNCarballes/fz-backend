@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { UserModel } from "../../../models/UserModel";
 import {logger} from "../../../utils/logger/logger"
-export const getEventRequestsSentController = async (req: Request, res: Response): Promise<void> => {
-  const userId = (req as any).userId;
+import { AuthRequest } from "../../../types/express";
+export const getEventRequestsSentController = async (req: AuthRequest, res: Response): Promise<void> => {
+  const userId = req.userId;
     if (!userId) {
       res.status(400).json({ error: "userId es obligatorio" });
       return;
@@ -19,7 +20,7 @@ export const getEventRequestsSentController = async (req: Request, res: Response
         return;
       }
 
-      res.status(200).json({ eventRequestsSent: user.eventRequestsSent });
+      res.status(200).json({ data: user.eventRequestsSent });
       return
     } catch (error) {
       logger.error({error},"❌ Error al obtener solicitudes de evento:");
