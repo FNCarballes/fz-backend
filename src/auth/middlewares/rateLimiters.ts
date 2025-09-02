@@ -59,3 +59,20 @@ export const limitPatchEventRequest = rateLimit({
   legacyHeaders: false,
   keyGenerator: (req: any) => (req?.userId ? String(req.userId) : normalizeIp(req)),
 });
+
+export const refreshRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 refresh por ventana
+  message: { error: "Demasiadas solicitudes de refresh. Intenta más tarde." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: any) => {
+    const deviceId = req.body?.deviceId;
+    const userId = req.userId; // si ya seteás userId en req tras validar JWT
+    if (typeof userId === "string" && typeof deviceId === "string") {
+      return `${userId}:${deviceId}`;
+    }
+    // fallback seguro si no hay userId aún (ataques o requests inválidos)
+    return normalizeIp(req);
+  },
+});

@@ -1,30 +1,37 @@
-// src/auth/utils/generateTokens.ts
+// src/utils/generateTokens.ts
 import jwt from "jsonwebtoken";
-import fs from "fs";
-import path from "path";
-import bcrypt from "bcrypt";
+import { privateKey, ISSUER } from "./keys/keys";
 import crypto from "crypto";
 
-const privateKey = fs.readFileSync(
-  path.join(__dirname, "../../keys/private.key"),
-  "utf-8"
-);
 
-export const generateTokens = async (userId: string, email: string) => {
+export const generateTokens = async (userId: string, email: string, audience = "mobile") => {
+  if (!ISSUER) throw new Error("ISSUER not configured");
+  const jti = crypto.randomUUID();
 
 
   // Access token
   const accessToken = jwt.sign(
-    { userId, email }, // payload
+    { email }, // payload
     privateKey,
     {
       algorithm: "RS256",
       expiresIn: "1h",
-      subject: userId, // `sub` en JWT
+      subject: userId,
+      issuer: ISSUER,
+      audience,
+      jwtid: crypto.randomUUID()
     }
   );
-  const jti = crypto.randomUUID();
+
   // Refresh token
-  const refreshToken = jwt.sign({ userId, email, jti }, privateKey, { algorithm: "RS256", expiresIn: "30d", subject: userId });
+  const refreshToken = jwt.sign({ email }, privateKey, {
+    algorithm: "RS256",
+    expiresIn: "30d",
+    subject: userId,
+    issuer: ISSUER,
+    audience,
+    jwtid: jti
+  });
+
   return { accessToken, refreshToken, jti };
 };

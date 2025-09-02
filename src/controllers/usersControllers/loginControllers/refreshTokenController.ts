@@ -21,9 +21,14 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
   }
   const { refreshToken, deviceId } = parsed.data;
   try {
-    const decoded = jwt.verify(refreshToken, publicKey, { algorithms: ["RS256"], issuer: process.env.JWT_ISSUER, audience: "mobile" }) as JwtPayload & { jti?: string, userId?: string };
+    const decoded = jwt.verify(refreshToken, publicKey, {
+      algorithms: ["RS256"],
+      issuer: process.env.JWT_ISSUER,
+      audience: "mobile",
+    }) as JwtPayload & { jti?: string, sub?: string, email: string };
 
-    if (!decoded || !decoded.userId || !decoded.jti) {
+    const userId = decoded.sub || decoded.userId;
+    if (!userId || !decoded.jti) {
       res.status(401).json({ message: "Token inválido" });
       return
     }
@@ -80,7 +85,7 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
     });
     await RefreshTokenModel.findByIdAndUpdate(session._id, { replacedBy: newSession._id });
     res.json({ accessToken, refreshToken: newRefreshToken });
-
+    //Devuelve json para mobiles
   } catch (error) {
     logger.error({ error, ip: req.ip }, "Error en refreshTokenController");
     res.status(401).json({ message: "Token inválido o expirado" });

@@ -20,20 +20,21 @@ export function validateEnv() {
     JWT_REFRESH_SECRET: str({
       desc: 'Clave secreta para firmar tokens de refresco JWT'
     }),
+    JWT_ISSUER: str({ desc: 'Valida que realmente fue emitido por tu servidor y no por otro sistema' }),
     GOOGLE_CLIENT_ID: str({
       desc: 'ID del cliente de Google para OAuth2'
     }),
     // AWS_ACCESS_KEY_ID: str({
-      // desc: 'Clave de acceso AWS para S3'
+    // desc: 'Clave de acceso AWS para S3'
     // }),
     // AWS_SECRET_ACCESS_KEY: str({
-      // desc: 'Secreto de acceso AWS para S3'
+    // desc: 'Secreto de acceso AWS para S3'
     // }),
     // AWS_REGION: str({
-      // desc: 'Región AWS donde está tu bucket'
+    // desc: 'Región AWS donde está tu bucket'
     // }),
     // BUCKET_NAME: str({
-      // desc: 'Nombre del bucket S3'
+    // desc: 'Nombre del bucket S3'
     // }),
     FRONTEND_URL: url({
       desc: '*' //CAMBIAR EN PRODUCCIÓN

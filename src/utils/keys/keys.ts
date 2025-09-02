@@ -1,15 +1,19 @@
+// src/utils/keys/keys.ts
 import fs from "fs";
-import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
 
-const privateKeyPath = process.env.PRIVATE_KEY_PATH!;
-const publicKeyPath = process.env.PUBLIC_KEY_PATH!;
+const privPath = process.env.PRIVATE_KEY_PATH || path.join(__dirname, "../../keys/private.key");
+const pubPath = process.env.PUBLIC_KEY_PATH || path.join(__dirname, "../../keys/public.key");
 
-if (!privateKeyPath || !publicKeyPath) {
-  throw new Error("Faltan las rutas a las claves RSA en variables de entorno");
+if (!process.env.JWT_ISSUER) {
+  throw new Error("JWT_ISSUER not set in env");
 }
 
-const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-const publicKey = fs.readFileSync(publicKeyPath, "utf8");
+if (!fs.existsSync(privPath) || !fs.existsSync(pubPath)) {
+  throw new Error("Private/Public key not found - check PRIVATE_KEY_PATH / PUBLIC_KEY_PATH");
+}
 
-export { privateKey, publicKey };
+export const privateKey = fs.readFileSync(privPath, "utf-8");
+export const publicKey = fs.readFileSync(pubPath, "utf-8");
+export const ISSUER = process.env.JWT_ISSUER;
+console.log(ISSUER)
