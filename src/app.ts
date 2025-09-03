@@ -45,10 +45,6 @@ app.get("/readyz", async (req, res) => {
     res.status(500).json({ status: "not-ready", error: e.message });
   }
 });
-
-// app.get("/debug-sentry", function mainHandler(req, res) {
-//   throw new Error("un nuevo eeerrror!");
-// });
 // Rutas
 app.use("/api/auth", loginRoute);
 app.use("/api/users", userRoute);
@@ -56,13 +52,6 @@ app.use("/api/events", eventRoute);
 app.use("/api/eventRequests", eventRequestRoute);
 app.use("/api/s3", s3Routes);
 Sentry.setupExpressErrorHandler(app);
-// Optional fallthrough error handler
-// app.use(function onError(err: any, req: Request, res: Response, next: NextFunction) {
-//   // The error id is attached to `res.sentry` to be returned
-//   // and optionally displayed to the user for support.
-//   res.statusCode = 500;
-//   res.end((res as any).sentry + "\n");
-// });
 app.use(function onError(err: any, req: Request, res: Response, next: NextFunction) {
   console.error("❌ Global error handler:", err);  // 👈 LOG ORIGINAL
   res.status(500).json({

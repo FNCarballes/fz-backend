@@ -3,17 +3,16 @@ import mongoose from "mongoose";
 import { EventRequestModel } from "../../models/EventRequestModel";
 import { Response } from "express";
 import { EventModel } from "../../models/EventsModel";
-import {logger} from "../../utils/logger/logger"
+import { logger } from "../../utils/logger/logger"
 type GetRequestQuery = {
   eventId: string;
-};  
+};
 //trae todas las solicitudes de un evento. Lo usa solo el creador del evento
 export const getEventRequestsController = async (
-  req: AuthRequest<{}, {}, {}, {}>, // tipa el cuarto genérico de AuthRequest, que es para Query.
-  res: Response
+  req: AuthRequest<{}, {}, {}, GetRequestQuery>, res: Response
 ): Promise<void> => {
   const userId = req.userId;
-  const eventId = (req as any).query.eventId;
+  const eventId = req.query.eventId;
 
   if (!userId || !eventId || !mongoose.Types.ObjectId.isValid(eventId)) {
     res
@@ -37,10 +36,11 @@ export const getEventRequestsController = async (
 
     const requests = await EventRequestModel.find({ eventId })
       .sort({ createdAt: -1 })
-      .populate("userId", "name surname email");
+      .populate("userId", "name email");
     res.json(requests);
   } catch (error) {
-    logger.error({error}, "❌ Error al obtener solicitudes de evento:");
+      // ✅ log con stack
+    logger.error(error, "❌ Error al obtener solicitudes de evento");
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
