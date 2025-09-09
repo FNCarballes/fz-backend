@@ -9,7 +9,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 const schema = z.object({
   refreshToken: z.string().min(20),
-  deviceId: z.string().min(6),
+  deviceId: z.string().min(1),
 });
 
 export const refreshTokenController = async (req: Request, res: Response): Promise<void> => {
@@ -25,16 +25,16 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
       algorithms: ["RS256"],
       issuer: process.env.JWT_ISSUER,
       audience: "mobile",
-    }) as JwtPayload & { jti?: string, sub?: string, email: string };
+    }) as JwtPayload & { jti?: string, sub?: string};
 
-    const userId = decoded.sub || decoded.userId;
+    const userId = decoded.sub;
     if (!userId || !decoded.jti) {
       res.status(401).json({ message: "Token inválido" });
       return
     }
 
     const session = await RefreshTokenModel.findOne({
-      userId: decoded.userId,
+      userId,
       deviceId,
       revokedAt: { $exists: false },
       expiresAt: { $gt: new Date() },
@@ -43,7 +43,7 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
     if (!session) {
       // No hay sesión activa -> posible reuso del token
       // Medida: revocar todas las sesiones del usuario y forzar re-login.
-      await RefreshTokenModel.updateMany({ userId: decoded.userId }, { $set: { revokedAt: new Date() } });
+      await RefreshTokenModel.updateMany({ userId }, { $set: { revokedAt: new Date() } });
       res.status(401).json({ message: "Token inválido o reuso detectado — cerrá sesión en todos los dispositivos" });
       return
     }
@@ -52,7 +52,7 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
     const isMatch = await bcrypt.compare(String(decoded.jti), session.tokenHash);
     if (!isMatch) {
       // Reuso o manipulación: revocar todas sesiones
-      await RefreshTokenModel.updateMany({ userId: decoded.userId }, { $set: { revokedAt: new Date() } });
+      await RefreshTokenModel.updateMany({ userId }, { $set: { revokedAt: new Date() } });
       res.status(401).json({ message: "Token inválido (reuso detectado)" });
       return
     }
@@ -67,16 +67,16 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
       return;
     }
 
-    const { accessToken, refreshToken: newRefreshToken, jti } = await generateTokens(decoded.userId, decoded.email);
+    const { accessToken, refreshToken: newRefreshToken, jti } = await generateTokens(userId);
 
-    const jtiHash = await bcrypt.hash(jti, 12); // cost: 12 (ajustar según CPU)
+    const jtiHash = await bcrypt.hash(jti, 10); // cost: 10 (ajustar según CPU)
     const userAgent = String(req.headers["user-agent"] || "unknown");
     const ip = req.ip;
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30); // 30d
 
     // Generar nuevos tokens
     const newSession = await RefreshTokenModel.create({
-      userId: decoded.userId,
+      userId,
       tokenHash: jtiHash,
       deviceId,
       userAgent,
@@ -84,7 +84,7 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
       expiresAt
     });
     await RefreshTokenModel.findByIdAndUpdate(session._id, { replacedBy: newSession._id });
-    res.json({ accessToken, refreshToken: newRefreshToken });
+    res.json({ accessToken, refreshToken: newRefreshToken, expiresAt });
     //Devuelve json para mobiles
   } catch (error) {
     logger.error({ error, ip: req.ip }, "Error en refreshTokenController");

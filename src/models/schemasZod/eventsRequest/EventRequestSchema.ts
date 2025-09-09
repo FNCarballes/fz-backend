@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Types } from "mongoose";
 
 export const createEventRequestSchema = z.object({
   eventId: z
@@ -30,15 +31,25 @@ export type UpdateEventRequestInput = z.infer<typeof updateEventRequestSchema>;
 // });
 // Sin opciones extras — Zod se encarga de devolver mensajes automáticos.
 
+// validators/eventRequests.ts
 
+export const objectId = z.string().refine(Types.ObjectId.isValid, "ObjectId inválido");
 
-export const requestIdParamSchema = z.object({
+export const getEventRequestsQuerySchema = z.object({
+  eventId: objectId,
+});
+
+export const requestIdParamsSchema = z.object({
+  requestId: objectId,
+});
+
+export const requestIdParamSchema2 = z.object({
   requestId: z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "El ID debe ser un ObjectId válido."),
 });
 
-export type RequestIdParamInput = z.infer<typeof requestIdParamSchema>;
+export type RequestIdParamInput = z.infer<typeof requestIdParamSchema2>;
 
 
 const isValidObjectId = (value: string) =>

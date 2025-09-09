@@ -44,13 +44,23 @@ export function validateParams(schema: ZodType<any, any, any>) {
   };
 }
 
-export function validateQuery(schema: ZodType<any, any, any>) {
+import { ZodTypeAny } from "zod";
+
+export function validateQuery(schema: ZodTypeAny) {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req.query);
+    // normalizar arrays -> primer valor, trim, etc.
+    const normalized = Object.fromEntries(
+      Object.entries(req.query).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])
+    );
+    Object.keys(normalized).forEach(k => {
+      if (typeof normalized[k] === 'string') normalized[k] = (normalized[k] as string).trim();
+    });
+
+    const result = schema.safeParse(normalized);
 
     if (!result.success) {
-      const issues = result.error.issues.map((e) => ({
-        path: e.path.join("."),
+      const issues = result.error.issues.map(e => ({
+        path: e.path.join('.'),
         message: e.message,
         code: e.code,
       }));
@@ -58,7 +68,9 @@ export function validateQuery(schema: ZodType<any, any, any>) {
       return;
     }
 
-    req.query = result.data;
+    // ✔️ No reasignes req.query. Guardá en res.locals
+    res.locals.validatedQuery = result.data;
     next();
   };
 }
+

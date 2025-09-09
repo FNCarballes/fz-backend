@@ -51,6 +51,12 @@ export const limitPostEventRequest = rateLimit({
   keyGenerator: (req: any) => (req?.userId ? String(req.userId) : normalizeIp(req)),
 });
 
+export const limitGetEventRequest = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 60, // máximo 60 requests por IP por minuto
+  message: "Too many requests from this IP, please try again later.",
+});
+
 export const limitPatchEventRequest = rateLimit({
   windowMs: 60 * 1000,
   max: 10,

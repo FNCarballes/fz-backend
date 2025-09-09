@@ -19,7 +19,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   // Se extraen los campos email y password que el usuario envía desde el frontend.
   const { email, password, deviceId } = req.body;
   console.log(req.body, "📩 Body recibido en login")
-  
+
   // Se valida que ambos campos estén presentes.
   try {
     const normalizedEmail = email.trim().toLowerCase();
@@ -44,33 +44,35 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       // ✅ Buscar si ya existe este dispositivo
       const existingDevice = user.devices.find((d) => d.deviceId === deviceId);
 
+      let currentDevice;
+
       if (existingDevice) {
-        // actualizar refreshToken y lastLogin
-        existingDevice.refreshToken = refreshToken;
         existingDevice.lastLogin = new Date();
+        currentDevice = existingDevice;
       } else {
-        // registrar nuevo dispositivo
-        user.devices.push({
+        const newDevice = {
           deviceId,
-          refreshToken,
           lastLogin: new Date(),
-          userAgent: req.headers["user-agent"], // opcional
-        });
+          userAgent: req.headers["user-agent"],
+        };
+        user.devices.push(newDevice);
+        currentDevice = newDevice;
       }
 
       await user.save();
 
 
-      const userId = user._id.toString(); // Convierte el ObjectId a string
-      const name = user.name; // Convierte el ObjectId a string
-      const surname = user.surname; // Convierte el ObjectId a string
-      const identify = user.identify; // Convierte el ObjectId a string
-      const age = user.age; // Convierte el ObjectId a string
-      const photos = user.photos; // Convierte el ObjectId a string
+      const userId = user._id.toString();
+      const name = user.name;
+      const surname = user.surname;
+      const identify = user.identify;
+      const age = user.age;
+      const photos = user.photos;
 
       res.json({
         accessToken,
         refreshToken,
+        deviceId: currentDevice.deviceId,
         userId,
         name,
         surname,

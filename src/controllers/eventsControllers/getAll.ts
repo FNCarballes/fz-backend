@@ -3,9 +3,12 @@ import { Request, Response, NextFunction } from "express";
 import { EventModel } from "../../models/EventsModel";
 import { cleanEventDoc } from "../../utils/cleanEventDoc";
 import { eventQuerySchema } from "../../models/schemasZod/events/eventQuerySchema";
+import z from "zod"
 
+
+type EventQueryInput = z.infer<typeof eventQuerySchema>;
 interface RequestWithQuery extends Request {
-  validatedQuery?: any;
+  validatedQuery?: EventQueryInput;
 }
 
 export const getAllEventsController = async (req: RequestWithQuery,
@@ -13,7 +16,7 @@ export const getAllEventsController = async (req: RequestWithQuery,
   try {
     const query = eventQuerySchema.parse(req.validatedQuery); // ⚠️ casteamos aquí con seguridad
 
-const { page, limit, isSolidary } = query;
+    const { page, limit, isSolidary } = query;
 
     // 1) Filtrado booleano
     const mongoQuery: any = {};
@@ -23,7 +26,8 @@ const { page, limit, isSolidary } = query;
 
     // 2) Paginación
     const skip = (page - 1) * limit;
-
+const maxLimit = 100;
+const finalLimit = Math.min(limit, maxLimit);
     // 3) Conteo total
     const total = await EventModel.countDocuments(mongoQuery);
 
@@ -31,15 +35,15 @@ const { page, limit, isSolidary } = query;
     const events = await EventModel.find(mongoQuery)
       .sort({ creationDate: -1 })
       .skip(skip)
-      .limit(limit)
-      .populate("creator", "-password -__v")
+      .limit(finalLimit)
+      .populate("creator", "name surname")
       .populate({
         path: "participants",
         select: "userId status",
         populate: {
           path: "userId",
           model: "User",
-          select: "name email surname age location identify",
+          select: "name surname age location identify",
         },
       })
       .populate({
@@ -48,9 +52,10 @@ const { page, limit, isSolidary } = query;
         populate: {
           path: "userId",
           model: "User",
-          select: "name email surname",
+          select: "name surname",
         },
-      });
+      }).lean(); // devuelve plain JS objects
+    ;
 
     // 5) Devolver datos + metadata
     res.json({

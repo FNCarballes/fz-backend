@@ -5,7 +5,7 @@ import { UserModel } from "../../../models/UserModel";
 import {logger} from "../../../utils/logger/logger"
 
 export const postEventRequestController = async (req: Request, res: Response): Promise<void> => {
-  const userId = (req as any).userId;
+  const userId = req.userId;
   const { requestId } = req.body;
 
   if (!userId || !requestId) {

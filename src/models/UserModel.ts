@@ -4,7 +4,6 @@ import { IUser } from "../types/userTypes";
 
 const deviceSchema = new mongoose.Schema({
   deviceId: { type: String, required: true },
-  refreshToken: { type: String, required: true },
   lastLogin: { type: Date, default: Date.now },
   userAgent: { type: String }, // opcional: navegador, versión app, etc.
 });

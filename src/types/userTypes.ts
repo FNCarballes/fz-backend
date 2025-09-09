@@ -2,7 +2,6 @@
 import mongoose, { Document } from "mongoose";
 export interface IDevice {
   deviceId: string;
-  refreshToken: string;
   lastLogin: Date;
   userAgent?: string;
 }

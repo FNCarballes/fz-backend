@@ -15,6 +15,6 @@ const router = express.Router();
 //Manejador: la función login importada anteriormente.
 //Es decir, cuando llegue una petición POST a /login, se ejecutará la función login.
 router.post("/login", loginRateLimiter, validate(loginSchema), login);
-router.post("/refresh",refreshRateLimiter, refreshTokenController);
+router.post("/refresh", refreshRateLimiter, refreshTokenController);
 export default router;
 //Esta porción de código es una ruta (o endpoint) de Express.js que define un manejador para peticiones HTTP de tipo POST al endpoint /login.
