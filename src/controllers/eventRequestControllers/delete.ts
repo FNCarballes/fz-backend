@@ -1,36 +1,50 @@
 // src/controllers/eventRequestControllers/delete.ts
-import { EventRequestModel } from "../../models/EventRequestModel";
-import { EventModel, IEvent } from "../../models/EventsModel";
-import { Response } from "express";
-import { AuthRequest } from "../../types/express";
+import { EventRequestModel } from "../../dataStructure/mongooseModels/EventRequestModel";
+import { EventModel, IEvent } from "../../dataStructure/mongooseModels/EventsModel";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../../dataStructure/types/express/Index";
 import { emitToCreator } from "../../sockets/forEventRequest/eventEmmiters";
 import mongoose from "mongoose";
-import {logger} from "../../utils/logger/logger"
+import { logger } from "../../utils/logger/logger"
+import { sendResponse } from "../../utils/helpers/apiResponse";
 type DeleteParams = {
   requestId: string;
 };
 export const deleteEventRequestController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   const userId = req.userId; // ✅ viene del token por authMiddleware
   const { requestId } = (req as any).params;
   if (!mongoose.Types.ObjectId.isValid(requestId)) {
-    res.status(400).json({ message: "requestId inválido." });
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: "requestId inválido."
+    });
     return;
   }
   try {
     // 1. Verificamos si la solicitud existe
     const request = await EventRequestModel.findById(requestId);
     if (!request) {
-      res.status(404).json({ message: "Solicitud no encontrada." });
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Solicitud no encontrada."
+      });
       return;
     }
 
     // 2. Buscamos el evento para conocer su creador
     const event = await EventModel.findById<IEvent>(request.eventId);
     if (!event) {
-      res.status(404).json({ message: "Evento no encontrado." });
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Evento no encontrado"
+      });
       return;
     }
 
@@ -39,9 +53,11 @@ export const deleteEventRequestController = async (
     const isRequester = request.userId.toString() === userId;
 
     if (!isOwner && !isRequester) {
-      res
-        .status(403)
-        .json({ message: "No autorizado para eliminar esta solicitud." });
+      sendResponse(res, {
+        statusCode: 403,
+        success: false,
+        message: "No autorizado para eliminar esta solicitud."
+      });
       return;
     }
 
@@ -50,16 +66,19 @@ export const deleteEventRequestController = async (
 
     // 5. Emitimos evento por sockets al creador
     const io = req.app.get("io");
-    await emitToCreator( event._id.toString(), "request:deleted", {
+    await emitToCreator(event._id.toString(), "request:deleted", {
       requestId,
       eventId: event._id,
       userId: request.userId,
       status: request.status,
     });
 
-    res.status(204).send(); // ✅ Todo ok, sin contenido
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+    });
+    return;
   } catch (error) {
-    logger.error({error}, "❌ Error al eliminar solicitud:");
-    res.status(500).json({ error: "Error interno del servidor." });
+    next(error)
   }
 };

@@ -7,7 +7,7 @@ import {
   getEventRequestsQuerySchema,
   requestIdParamSchema2,
   requestIdParamsSchema
-} from "../models/schemasZod/eventsRequest/EventRequestSchema";
+} from "../dataStructure/schemasZod/eventsRequest/EventRequestSchema";
 import { validate, validateQuery, validateParams } from "../auth/Validate";
 import { postEventRequestController } from "../controllers/eventRequestControllers/create";
 import { getEventRequestsController } from "../controllers/eventRequestControllers/getAll";
@@ -18,7 +18,7 @@ import {
   limitPostEventRequest,
   limitPatchEventRequest,
 } from "../auth/middlewares/rateLimiters";
-import { AuthRequest } from "../types/express";
+import { AuthRequest } from "../dataStructure/types/express/Index";
 type GetRequestQuery = {
   eventId: string;
 };

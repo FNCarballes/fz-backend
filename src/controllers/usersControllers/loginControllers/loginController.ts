@@ -7,14 +7,14 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 //Se importa el modelo de usuario de Mongoose.
 //Se renombra el modelo (UserModel) como User para usarlo en el código más fácilmente.
-import { UserModel as User } from "../../../models/UserModel"; // Asegúrate de tipar el modelo adecuadamente
+import { UserModel as User } from "../../../dataStructure/mongooseModels/UserModel"; // Asegúrate de tipar el modelo adecuadamente
 //Importa una interfaz de TypeScript que define la estructura de un usuario
 // (IUser) para garantizar que el objeto tiene las propiedades esperadas, como email, password, etc.
-import { generateTokens } from "../../../utils/generateTokens"; // Importa la función para generar tokens
+import { generateTokens } from "../../../utils/helpers/generateTokens"; // Importa la función para generar tokens
 //Recibe una petición (req) y una respuesta (res) y no devuelve nada (Promise<void>).
 //Es usada como controlador cuando un usuario intenta iniciar sesión.
 import { logger } from "../../../utils/logger/logger"
-import { IUserDocument } from "../../../models/UserModel";
+import { IUserDocument } from "../../../dataStructure/mongooseModels/UserModel";
 export const login = async (req: Request, res: Response): Promise<void> => {
   // Se extraen los campos email y password que el usuario envía desde el frontend.
   const { email, password, deviceId } = req.body;

@@ -1,7 +1,7 @@
 // src/socket/eventEmitters.ts
 import { getIo } from "../socket";
 import { logger } from "../../utils/logger/logger";
-import { EventModel } from "../../models/EventsModel";
+import { EventModel } from "../../dataStructure/mongooseModels/EventsModel";
 
 export const emitToCreator = async (
   eventId: string,

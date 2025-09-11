@@ -6,7 +6,7 @@ import express from "express";
 import { login } from "../controllers/usersControllers/loginControllers/loginController";
 import { loginRateLimiter, refreshRateLimiter } from "../auth/middlewares/rateLimiters";
 import { validate } from "../auth/Validate";
-import { loginSchema } from "../models/schemasZod/login/loginSchema"; // Asegúrate de que este esquema esté definido
+import { loginSchema } from "../dataStructure/schemasZod/login/LoginSchema"; // Asegúrate de que este esquema esté definido
 import { refreshTokenController } from "../controllers/usersControllers/loginControllers/refreshTokenController";
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import { UserModel } from "../../models/UserModel";
+import { UserModel } from "../../dataStructure/mongooseModels/UserModel";
 import { logger } from "../../utils/logger/logger"
 import { usersCreated } from "../../utils/monitoring/prometheus";
 

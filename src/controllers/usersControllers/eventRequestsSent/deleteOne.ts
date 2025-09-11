@@ -1,6 +1,6 @@
 // src/controllers/usersControllers/eventRequestsSent/deleteOne.ts
 import { Request, Response } from "express";
-import { UserModel } from "../../../models/UserModel";
+import { UserModel } from "../../../dataStructure/mongooseModels/UserModel";
 import { logger } from "../../../utils/logger/logger";
 
 type DeleteUserParams = {

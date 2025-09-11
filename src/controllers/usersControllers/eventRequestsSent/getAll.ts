@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { UserModel } from "../../../models/UserModel";
+import { UserModel } from "../../../dataStructure/mongooseModels/UserModel";
 import {logger} from "../../../utils/logger/logger"
-import { AuthRequest } from "../../../types/express";
+import { AuthRequest } from "../../../dataStructure/types/express/Index";
 export const getEventRequestsSentController = async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId;
     if (!userId) {

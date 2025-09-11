@@ -1,11 +1,11 @@
 // src/controllers/eventsControllers/getAll.ts
 import { Request, Response, NextFunction } from "express";
-import { EventModel } from "../../models/EventsModel";
-import { cleanEventDoc } from "../../utils/cleanEventDoc";
-import { eventQuerySchema } from "../../models/schemasZod/events/eventQuerySchema";
+import { EventModel } from "../../dataStructure/mongooseModels/EventsModel";
+import { cleanEventDoc } from "../../utils/helpers/cleanEventDoc";
+import { eventQuerySchema } from "../../dataStructure/schemasZod/events/EventQuerySchema";
 import z from "zod"
-
-
+import { sendResponse } from "../../utils/helpers/apiResponse";
+import { buildPagination } from "../../utils/helpers/pagination";
 type EventQueryInput = z.infer<typeof eventQuerySchema>;
 interface RequestWithQuery extends Request {
   validatedQuery?: EventQueryInput;
@@ -14,9 +14,8 @@ interface RequestWithQuery extends Request {
 export const getAllEventsController = async (req: RequestWithQuery,
   res: Response, next: NextFunction) => {
   try {
-    const query = eventQuerySchema.parse(req.validatedQuery); // ⚠️ casteamos aquí con seguridad
 
-    const { page, limit, isSolidary } = query;
+    const { page, limit, isSolidary } = req.validatedQuery!;
 
     // 1) Filtrado booleano
     const mongoQuery: any = {};
@@ -25,13 +24,9 @@ export const getAllEventsController = async (req: RequestWithQuery,
     }
 
     // 2) Paginación
-    const skip = (page - 1) * limit;
-const maxLimit = 100;
-const finalLimit = Math.min(limit, maxLimit);
-    // 3) Conteo total
-    const total = await EventModel.countDocuments(mongoQuery);
+    const { skip, limit: finalLimit } = buildPagination(page, limit);
 
-    // 4) Consulta con skip/limit
+    // 3) Consulta con skip/limit
     const events = await EventModel.find(mongoQuery)
       .sort({ creationDate: -1 })
       .skip(skip)
@@ -57,15 +52,10 @@ const finalLimit = Math.min(limit, maxLimit);
       }).lean(); // devuelve plain JS objects
     ;
 
-    // 5) Devolver datos + metadata
-    res.json({
-      metadata: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-      data: events.map(cleanEventDoc),
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      data: events.map(cleanEventDoc)
     });
   } catch (err) {
     next(err);

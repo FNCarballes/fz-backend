@@ -2,8 +2,8 @@
 import { publicKey } from "../../../utils/keys/keys";  // ajusta ruta según estructura
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response } from "express";
-import { generateTokens } from "../../../utils/generateTokens";
-import { RefreshTokenModel } from "../../../models/RefreshTokenModel";
+import { generateTokens } from "../../../utils/helpers/generateTokens";
+import { RefreshTokenModel } from "../../../dataStructure/mongooseModels/RefreshTokenModel";
 import { logger } from "../../../utils/logger/logger"
 import { z } from "zod";
 import bcrypt from "bcrypt";

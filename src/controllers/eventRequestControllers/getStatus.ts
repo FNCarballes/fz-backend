@@ -1,8 +1,8 @@
 import { Response, NextFunction } from "express";
-import { EventRequestModel } from "../../models/EventRequestModel";
-import { AuthRequest } from "../../types/express/index";
+import { EventRequestModel } from "../../dataStructure/mongooseModels/EventRequestModel";
+import { AuthRequest } from "../../dataStructure/types/express/Index";
 import mongoose from "mongoose";
-import {logger} from "../../utils/logger/logger"
+import { sendResponse } from "../../utils/helpers/apiResponse";
 interface GetStatusQuery {
   eventId?: string;
 }
@@ -19,19 +19,31 @@ export const getStatusEventRequestController = async (
     const userId = req.userId; // obtenido del token
 
     if (!userId || !eventId) {
-      res.status(400).json({
-        message: "eventId es requerido en query, userId desde token.",
+      sendResponse(res, {
+        statusCode: 400,
+        success: false,
+        message: "Falta eventId en query o userId en token."
       });
       return;
     }
 
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
-   res.status(400).json({ message: "eventId inválido." });
-return
+      sendResponse(res, {
+        statusCode: 400,
+        success: false,
+        message: "eventId inválido."
+      });
+      return;
   }
     const request = await EventRequestModel.findOne({ userId, eventId });
 
     res.json({ status: request?.status ?? "none" });
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      data: request?.status ?? "none"
+    });
+    return;
   } catch (error) {
     next(error);
   }

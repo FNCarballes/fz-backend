@@ -1,10 +1,11 @@
 // src/controllers/eventsControllers/create.ts
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
-import { EventModel } from "../../models/EventsModel";
-import { cleanEventDoc } from "../../utils/cleanEventDoc";
-import { CreateEventInput } from "../../models/schemasZod/events/CreateEventSchema";
+import { EventModel } from "../../dataStructure/mongooseModels/EventsModel";
+import { cleanEventDoc } from "../../utils/helpers/cleanEventDoc";
+import { CreateEventInput } from "../../dataStructure/schemasZod/events/CreateEventSchema";
 import { eventsCreated } from "../../utils/monitoring/prometheus";
+import { sendResponse } from "../../utils/helpers/apiResponse";
 import { notifyUser } from "../notificationsControllers/notificationController";
 export const createEventController = async (
   req: Request,
@@ -24,8 +25,14 @@ export const createEventController = async (
       isSolidary,
     } = input;
     const userId = (req as any).userId;
-    if (!userId) return res.status(401).json({ error: "No autenticado" });
-
+    if (!userId) {
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "No autenticado"
+      });
+      return;
+    }
     const newEvent = new EventModel({
       titleEvent,
       publicDescription,
@@ -41,7 +48,11 @@ export const createEventController = async (
       const io = req.app.get("io") as SocketIOServer | undefined;
     if (io) io.emit("event:created", cleanEventDoc(saved)); // no llames a un singleton no inicializado
     eventsCreated.inc();
-    res.status(201).json({ id: saved._id });
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+      data: saved._id
+    });
   } catch (err) {
     next(err);
   }

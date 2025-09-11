@@ -1,4 +1,4 @@
-//userTypes.ts
+//UserTypes.ts
 import mongoose, { Document } from "mongoose";
 export interface IDevice {
   deviceId: string;

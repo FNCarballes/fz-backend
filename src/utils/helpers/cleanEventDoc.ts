@@ -1,5 +1,5 @@
 // src/utils/cleanEventDoc.ts
-import type { IEvent } from "../models/EventsModel";
+import type { IEvent } from "../../dataStructure/mongooseModels/EventsModel";
 
 function asPlain<T = any>(v: any): T {
   // Convierte un documento de Mongoose a objeto plano si tiene toObject()

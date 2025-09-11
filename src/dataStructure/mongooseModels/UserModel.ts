@@ -1,6 +1,6 @@
 // models/User.ts
 import mongoose from "mongoose";
-import { IUser } from "../types/userTypes";
+import { IUser } from "../types/UserTypes";
 
 const deviceSchema = new mongoose.Schema({
   deviceId: { type: String, required: true },

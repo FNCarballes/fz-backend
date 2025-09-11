@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { Server as SocketIOServer } from "socket.io";
-import { EventModel } from "../../models/EventsModel";
-import { cleanEventDoc } from "../../utils/cleanEventDoc";
-import { updateEventSchema } from "../../models/schemasZod/events/UpdateEventSchema";
-import { logger } from "../../utils/logger/logger"
+import { EventModel } from "../../dataStructure/mongooseModels/EventsModel";
+import { cleanEventDoc } from "../../utils/helpers/cleanEventDoc";
+import { updateEventSchema } from "../../dataStructure/schemasZod/events/UpdateEventSchema";
+import { sendResponse } from "../../utils/helpers/apiResponse";
 export const updateEventController = async (req: Request<{ id: string }>,
   res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -12,12 +12,20 @@ export const updateEventController = async (req: Request<{ id: string }>,
 
     const event = await EventModel.findById(id);
     if (!event) {
-      res.status(404).json({ error: "Evento no encontrado" });
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Evento no encontradp."
+      });
       return;
     }
 
     if (event.creator.toString() !== userId.toString()) {
-      res.status(403).json({ error: "No autorizado" });
+      sendResponse(res, {
+        statusCode: 403,
+        success: false,
+        message: "No autorizado."
+      });
       return;
     }
 
@@ -31,8 +39,12 @@ export const updateEventController = async (req: Request<{ id: string }>,
     const io = req.app.get("io") as SocketIOServer;
     io.emit("event:updated", cleanEventDoc(updated));
 
-    res.status(200).json({ data: cleanEventDoc(updated) });
-  } catch (err) {
-    next(err);
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      data: cleanEventDoc(updated)
+    });
+  } catch (error) {
+    next(error);
   }
 }

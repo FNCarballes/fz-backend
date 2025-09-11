@@ -1,7 +1,7 @@
 // src/auth/middlewares/rateLimiters.ts
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
-import "../../models/EventsModel"; // si lo necesitás sólo para registrar el modelo
-import { AuthRequest } from "../../types/express";
+import "../../dataStructure/mongooseModels/EventsModel"; // si lo necesitás sólo para registrar el modelo
+import { AuthRequest } from "../../dataStructure/types/express/Index";
 
 // helper local para normalizar IP o fallback
 const normalizeIp = (req: any) => {

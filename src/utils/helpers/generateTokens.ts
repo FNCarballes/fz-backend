@@ -1,6 +1,6 @@
 // src/utils/generateTokens.ts
 import jwt from "jsonwebtoken";
-import { privateKey, ISSUER } from "./keys/keys";
+import { privateKey, ISSUER } from "../keys/keys";
 import crypto from "crypto";
 
 
