@@ -49,5 +49,8 @@ export function validateEnv() {
       desc: 'Habilita o deshabilita notificaciones por email'
     }),
     SENTRY_DSN: str(),
-  })
+    REDIS_URL:str(),
+  }
+
+)
 }

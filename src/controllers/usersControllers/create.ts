@@ -1,12 +1,13 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { UserModel } from "../../dataStructure/mongooseModels/UserModel";
-import { logger } from "../../utils/logger/logger"
+import { sendResponse } from "../../utils/helpers/apiResponse";
 import { usersCreated } from "../../utils/monitoring/prometheus";
 
 export const createUserController = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     console.log(req.body, "📩 Body recibido en createUserController")
@@ -17,7 +18,12 @@ export const createUserController = async (
     // Verificar si el email ya existe
     const existingUser = await UserModel.findOne({ email: normalizedEmail });
     if (existingUser) {
-      res.status(409).json({ error: "El correo ya está registrado" }); return;
+      sendResponse(res, {
+        statusCode: 409,
+        success: false,
+        message: "No es posible registrar este correo."
+      });
+      return;
     }
 
     // Encriptar la contraseña
@@ -37,11 +43,12 @@ export const createUserController = async (
     //.save() es un método que hereda cualquier objeto creado con un modelo de Mongoose.
     const savedUser = await newUser.save();
     usersCreated.inc();
-    res.status(201).json({ id: savedUser._id });
+    sendResponse(res, {
+      statusCode: 201,
+      success: true,
+    });
     return;
   } catch (error) {
-    logger.error({ error }, "❌ Error al crear usuario:");
-    console.log(error, "❌ Error al crear usuario:")
-    res.status(500).json({ error: "Error interno del servidor" });
+    next(error)
   }
 };

@@ -1,5 +1,5 @@
 // src/services/NotificationService.ts
-import { getIo } from "../../sockets/socket";
+import { getIo } from "../../sockets/indexSocket";
 import { logger } from "../../utils/logger/logger";
 
 export function notifyUser(userId: string, event: string, payload: any) {

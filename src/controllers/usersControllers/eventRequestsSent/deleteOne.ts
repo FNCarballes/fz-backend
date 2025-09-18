@@ -1,15 +1,15 @@
 // src/controllers/usersControllers/eventRequestsSent/deleteOne.ts
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { UserModel } from "../../../dataStructure/mongooseModels/UserModel";
-import { logger } from "../../../utils/logger/logger";
-
+import { sendResponse } from "../../../utils/helpers/apiResponse";
 type DeleteUserParams = {
   requestId: string;
 };
 
 export const deleteEventRequestSentController = async (
   req: Request<DeleteUserParams>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   const userId = (req as any).userId;
   const { requestId } = req.params;
@@ -23,7 +23,11 @@ export const deleteEventRequestSentController = async (
   try {
     const user = await UserModel.findById(userId);
     if (!user) {
-      res.status(404).json({ error: "Usuario no encontrado" });
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Usuario no encontrado."
+      });
       return;
     }
 
@@ -33,7 +37,11 @@ export const deleteEventRequestSentController = async (
     );
 
     if (!exists) {
-      res.status(404).json({ error: "Solicitud no encontrada en el usuario" });
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Solicitud no encontradaen el usuario."
+      });
       return;
     }
 
@@ -43,8 +51,12 @@ export const deleteEventRequestSentController = async (
     await user.save();
 
     res.status(200).json({ message: "Solicitud de evento eliminada" });
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+    });
+    return;
   } catch (error) {
-    logger.error({ error }, "❌ Error al eliminar solicitud de evento:");
-    res.status(500).json({ error: "Error interno del servidor" });
+    next(error)
   }
 };

@@ -1,8 +1,7 @@
 // authController.ts
 //Esto permite tipar correctamente los parámetros de la función para tener autocompletado y validaciones en TypeScript.
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 //Importa jsonwebtoken, una biblioteca para generar y verificar tokens JWT (JSON Web Tokens), usados para autenticación.
-import jwt from "jsonwebtoken";
 //Importa bcrypt, una biblioteca para hashing (encriptado unidireccional) y comparar contraseñas.
 import bcrypt from "bcrypt";
 //Se importa el modelo de usuario de Mongoose.
@@ -15,7 +14,8 @@ import { generateTokens } from "../../../utils/helpers/generateTokens"; // Impor
 //Es usada como controlador cuando un usuario intenta iniciar sesión.
 import { logger } from "../../../utils/logger/logger"
 import { IUserDocument } from "../../../dataStructure/mongooseModels/UserModel";
-export const login = async (req: Request, res: Response): Promise<void> => {
+import { sendResponse } from "../../../utils/helpers/apiResponse";
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   // Se extraen los campos email y password que el usuario envía desde el frontend.
   const { email, password, deviceId } = req.body;
   console.log(req.body, "📩 Body recibido en login")
@@ -25,13 +25,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const normalizedEmail = email.trim().toLowerCase();
     const user = await User.findOne<IUserDocument>({ email: normalizedEmail });
     if (!user) {
-      res.status(401).json({ "message": "Usuario o contraseña inválidos" });
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Usuario o contraseña inválidos."
+      });
       return;
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      res.status(401).json({ "message": "Usuario o contraseña inválidos" });
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Usuario o contraseña inválidos."
+      });
       return;
     }
 
@@ -68,23 +76,31 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       const identify = user.identify;
       const age = user.age;
       const photos = user.photos;
-
-      res.json({
-        accessToken,
-        refreshToken,
-        deviceId: currentDevice.deviceId,
-        userId,
-        name,
-        surname,
-        identify,
-        age,
-        photos,
+      sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        data: {
+          accessToken,
+          refreshToken,
+          deviceId: currentDevice.deviceId,
+          userId,
+          name,
+          surname,
+          identify,
+          age,
+          photos,
+        }
       });
+      return;
     } else {
-      res.status(401).json({ message: "Usuario o contraseña incorrectos" });
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Auth falló."
+      });
+      return;
     }
   } catch (error) {
-    logger.error({ error }, "Login error:"); // Registra el error completo en el servidor
-    res.status(500).json({ message: "Error del servidor" }); // Envía un mensaje genérico al cliente
+    next(error)
   }
 };

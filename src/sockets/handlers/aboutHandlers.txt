@@ -1,0 +1,13 @@
+// El socket (chat.ts, events.ts, notifications.ts) se limita a:
+
+// Escuchar un evento.
+
+// Validar datos (con Zod o lo que uses).
+
+// Llamar al service.
+
+// Emitir el resultado o error.
+
+
+lo correcto es que las notifs las genere el backend en lógica de negocio (ej: alguien te invita → backend llama a notifyUser).
+NO DESDE EL CLIENTE!

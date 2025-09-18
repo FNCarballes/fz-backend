@@ -76,6 +76,7 @@ export const deleteEventRequestController = async (
     sendResponse(res, {
       statusCode: 200,
       success: true,
+      message: "Solicitud eliminada"
     });
     return;
   } catch (error) {

@@ -1,10 +1,10 @@
 //src/controllers/usersControllers/loginControllers/refreshTokenController
 import { publicKey } from "../../../utils/keys/keys";  // ajusta ruta según estructura
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { generateTokens } from "../../../utils/helpers/generateTokens";
 import { RefreshTokenModel } from "../../../dataStructure/mongooseModels/RefreshTokenModel";
-import { logger } from "../../../utils/logger/logger"
+import { sendResponse } from "../../../utils/helpers/apiResponse";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 const schema = z.object({
@@ -12,12 +12,16 @@ const schema = z.object({
   deviceId: z.string().min(1),
 });
 
-export const refreshTokenController = async (req: Request, res: Response): Promise<void> => {
+export const refreshTokenController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ message: "Bad request" });
-    return
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: "Mala solicitud."
+    });
+    return;
   }
   const { refreshToken, deviceId } = parsed.data;
   try {
@@ -29,8 +33,12 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
 
     const userId = decoded.sub;
     if (!userId || !decoded.jti) {
-      res.status(401).json({ message: "Token inválido" });
-      return
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Tokne inválido."
+      });
+      return;
     }
 
     const session = await RefreshTokenModel.findOne({
@@ -44,8 +52,12 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
       // No hay sesión activa -> posible reuso del token
       // Medida: revocar todas las sesiones del usuario y forzar re-login.
       await RefreshTokenModel.updateMany({ userId }, { $set: { revokedAt: new Date() } });
-      res.status(401).json({ message: "Token inválido o reuso detectado — cerrá sesión en todos los dispositivos" });
-      return
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Token inválido o reuso detectado - cerrá sesion en todos los dispositivos."
+      });
+      return;
     }
 
 
@@ -53,8 +65,12 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
     if (!isMatch) {
       // Reuso o manipulación: revocar todas sesiones
       await RefreshTokenModel.updateMany({ userId }, { $set: { revokedAt: new Date() } });
-      res.status(401).json({ message: "Token inválido (reuso detectado)" });
-      return
+      sendResponse(res, {
+        statusCode: 401,
+        success: false,
+        message: "Token inválido (reuso detectado)."
+      });
+      return;
     }
 
     // Revocación atómica para evitar carreras
@@ -63,7 +79,11 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
       { $set: { revokedAt: new Date() } }
     );
     if (updated.modifiedCount === 0) {
-      res.status(409).json({ message: "Token ya rotado" });
+      sendResponse(res, {
+        statusCode: 409,
+        success: false,
+        message: "Token ya rotado."
+      });
       return;
     }
 
@@ -84,10 +104,14 @@ export const refreshTokenController = async (req: Request, res: Response): Promi
       expiresAt
     });
     await RefreshTokenModel.findByIdAndUpdate(session._id, { replacedBy: newSession._id });
-    res.json({ accessToken, refreshToken: newRefreshToken, expiresAt });
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      data: {accessToken, refresToken: newRefreshToken, expiresAt}
+    });
+    return;
     //Devuelve json para mobiles
   } catch (error) {
-    logger.error({ error, ip: req.ip }, "Error en refreshTokenController");
-    res.status(401).json({ message: "Token inválido o expirado" });
+   next(error)
   }
 };

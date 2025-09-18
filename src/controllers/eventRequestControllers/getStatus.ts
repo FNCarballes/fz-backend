@@ -37,7 +37,6 @@ export const getStatusEventRequestController = async (
   }
     const request = await EventRequestModel.findOne({ userId, eventId });
 
-    res.json({ status: request?.status ?? "none" });
     sendResponse(res, {
       statusCode: 200,
       success: true,

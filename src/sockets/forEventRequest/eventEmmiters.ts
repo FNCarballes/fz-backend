@@ -1,5 +1,5 @@
 // src/socket/eventEmitters.ts
-import { getIo } from "../socket";
+import { getIo } from "../indexSocket";
 import { logger } from "../../utils/logger/logger";
 import { EventModel } from "../../dataStructure/mongooseModels/EventsModel";
 

@@ -5,8 +5,8 @@ import mongoose from "mongoose";
 import { logger } from "./utils/logger/logger"; 
 import { validateEnv } from "./dataStructure/types/config/ValidateEnv";
 import app from "./app";
-import { setupSocketIO } from "./sockets/setUpSockets";
-import { initSocket } from "./sockets/socket";
+import { setupSocketIO } from "./sockets/middlewaresSockets/setUpSockets";
+import { initSocket } from "./sockets/indexSocket";
 import { gracefulShutdown } from "./utils/server/gracefulShutdown";
 
 const env = validateEnv();

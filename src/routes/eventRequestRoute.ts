@@ -1,5 +1,5 @@
 import express from "express";
-import { authMiddleware } from "../auth/middlewares/authMiddleware";
+import { authMiddleware } from "../sockets/middlewaresSockets/authMiddleware";
 import {
   createEventRequestSchema,
   updateEventRequestSchema,

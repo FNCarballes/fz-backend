@@ -1,16 +1,16 @@
 // src/controllers/usersControllers/eventRequestsSent/create.ts
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { UserModel } from "../../../dataStructure/mongooseModels/UserModel";
 import {logger} from "../../../utils/logger/logger"
 import { sendResponse } from "../../../utils/helpers/apiResponse";
-export const postEventRequestSentController = async (req: Request, res: Response): Promise<void> => {
+export const postEventRequestSentController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const userId = req.userId;
   const { requestId } = req.body;
 
   if (!userId || !requestId) {
     sendResponse(res, {
-      statusCode: 400,
+      statusCode: 400, 
       success: false,
       message: "Falta requestId o token"
     });
@@ -54,7 +54,6 @@ export const postEventRequestSentController = async (req: Request, res: Response
     await user.save();
     
 
-    res.status(200).json({ message: "Solicitud de evento agregada" });
     sendResponse(res, {
       statusCode: 200,
       success: true,
@@ -62,7 +61,6 @@ export const postEventRequestSentController = async (req: Request, res: Response
     });
     return;
   } catch (error) {
-    logger.error({error}, "❌ Error al agregar solicitud de evento:");
-    res.status(500).json({ error: "Error interno del servidor" });
+  next(error)
   }
 };

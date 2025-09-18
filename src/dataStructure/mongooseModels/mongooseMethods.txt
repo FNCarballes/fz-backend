@@ -1,0 +1,34 @@
+📌 ¿Cuándo usar cada uno?
+
+Usar .lean() cuando:
+
+Vas a leer datos para devolver al cliente.
+
+No necesitás mutar ni usar métodos de documento.
+
+Estás en endpoints tipo GET o listado.
+
+Querés performance (queries masivas, listados grandes).
+
+Usar .toObject() cuando:
+
+Recién hiciste un .create() o .save() y querés devolver el objeto limpio.
+
+Querés aplicar transformaciones definidas en schema.set("toObject", { transform }).
+
+Tenés un doc único (no un array gigante), y el costo de la conversión es despreciable.
+
+Usar ninguno (dejar como doc Mongoose) cuando:
+
+Vas a seguir trabajando con el documento (ej: doc.populate(), doc.save(), hooks).
+
+Estás en lógica de negocio interna, no en la capa de respuesta.
+
+
+En servicios de lectura (GET/listados): .lean() siempre.
+→ Más rápido, evita fugas de lógica en el cliente.
+
+En escritura inmediata (create(), save()): .toObject() al devolver.
+→ Te aseguras devolver un JSON puro.
+
+En lógica interna de negocio: usá el documento crudo de Mongoose.

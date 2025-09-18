@@ -45,6 +45,7 @@ export const deleteEventController = async (req: AuthRequest<DeleteEventParams>,
     sendResponse(res, {
       statusCode: 200,
       success: true,
+      message: "Evento eliminado"
     });
     return;
   } catch (err) {

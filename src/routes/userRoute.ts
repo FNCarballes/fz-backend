@@ -1,6 +1,6 @@
 //userRoute.ts
 import express from "express";
-import { authMiddleware } from "../auth/middlewares/authMiddleware";
+import { authMiddleware } from "../sockets/middlewaresSockets/authMiddleware";
 import "../dataStructure/mongooseModels/EventsModel"; // Importar solo para registrar el modelo
 import { createUserController } from "../controllers/usersControllers/create";
 import { validateParams, validate } from "../auth/Validate";

@@ -1,29 +1,40 @@
-import { Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import { UserModel } from "../../../dataStructure/mongooseModels/UserModel";
-import {logger} from "../../../utils/logger/logger"
 import { AuthRequest } from "../../../dataStructure/types/express/Index";
-export const getEventRequestsSentController = async (req: AuthRequest, res: Response): Promise<void> => {
+import { sendResponse } from "../../../utils/helpers/apiResponse";
+export const getEventRequestsSentController = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
   const userId = req.userId;
-    if (!userId) {
-      res.status(400).json({ error: "userId es obligatorio" });
+  if (!userId) {
+    sendResponse(res, {
+      statusCode: 400,
+      success: false,
+      message: "Falta userId."
+    });
+    return;
+  }
+
+  try {
+    const user = await UserModel.findById(userId).populate(
+      "eventRequestsSent",
+      "eventId titleEvent status"
+    );
+
+    if (!user) {
+      sendResponse(res, {
+        statusCode: 404,
+        success: false,
+        message: "Usuario no encontrado."
+      });
       return;
     }
 
-    try {
-      const user = await UserModel.findById(userId).populate(
-        "eventRequestsSent",
-        "eventId titleEvent status"
-      );
-
-      if (!user) {
-        res.status(404).json({ error: "Usuario no encontrado" });
-        return;
-      }
-
-      res.status(200).json({ data: user.eventRequestsSent });
-      return
-    } catch (error) {
-      logger.error({error},"❌ Error al obtener solicitudes de evento:");
-      res.status(500).json({ error: "Error interno del servidor" });
-    }
+    sendResponse(res, {
+      statusCode: 200,
+      success: false,
+      data: user.eventRequestsSent
+    });
+    return;
+  } catch (error) {
+    next(error)
   }
+}
